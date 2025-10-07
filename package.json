@@ -18,11 +18,11 @@
   "license": "ISC",
   "author": "Arath Campos",
   "type": "module",
-  "main": "./src/server/index.ts",
+  "main": "./src/index.ts",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "node --env-file=./.env ./src/server/index.ts",
+    "start": "node --env-file=./.env ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
