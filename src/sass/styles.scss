@@ -1,5 +1,7 @@
 @use 'color-scheme';
 $font-family: "Noto Sans", sans-serif;
+$mobile-breakpoint: 768px;
+
 
 * {
     font-family: $font-family;
@@ -23,10 +25,93 @@ header {
 }
 
 main {
-    margin: 0 2rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+    max-width: 1024px;
 }
 
 h1 {
     margin: 0;
     text-align: center;
+}
+
+h2 {
+    margin: 1rem 0;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
+.game {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 2rem;
+    gap: 2rem;
+    justify-content: center;
+
+    .canvas {
+        background-color: color-scheme.$tertiary-color;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        max-width: 35rem;
+    }
+
+    .info {
+        width: 100%;
+    }
+}
+
+.info {
+    .tutorial {
+        ul {
+            padding-left: 1rem;
+            margin: 1rem 0;
+            display: grid;
+            gap: 0.5rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        li {
+            list-style: none;
+        }
+    }
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0 2rem;
+        button {
+            background-color: color-scheme.$secondary-color;
+            border: 1px solid color-scheme.$stroke-color;
+            border-radius: 0.5rem;
+            width: 100%;
+            padding: 1rem;
+        }
+    }
+}
+
+.alert {
+    margin-top: 2rem;
+    display: flex;
+    width: auto;
+    padding: 2rem;
+    margin: 0 2rem;
+    border-radius: 1rem;
+    justify-content: center;
+    align-items: center;
+    background-color: color-scheme.$alert-idle-color;
+
+    p {
+        text-align: center;
+        margin: 0
+    }
+}
+
+hr {
+    margin: 4rem 0.5rem;
+    border: 1px solid color-scheme.$stroke-color;
+}
+
+@media screen and (min-width: $mobile-breakpoint) {
+    // Modifiers to allow responsive layout
 }
