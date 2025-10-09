@@ -1,8 +1,5 @@
+@use 'color-scheme';
 $font-family: "Noto Sans", sans-serif;
-
-$primary-color: hsl(20, 20%, 20%);
-$secondary-color: hsl(20, 20%, 25%);
-$foreground-color: hsl(0, 0%, 80%);
 
 * {
     font-family: $font-family;
@@ -11,16 +8,16 @@ $foreground-color: hsl(0, 0%, 80%);
     font-style: normal;
     font-variation-settings:
         "wdth" 100;
-    color: $foreground-color
+    color: color-scheme.$foreground-color
 }
 
 body {
-    background-color: $primary-color;
+    background-color: color-scheme.$primary-color;
     margin: 0
 }
 
 header {
-    background-color: $secondary-color;
+    background-color: color-scheme.$secondary-color;
     padding: 1.5rem;
     margin-bottom: 2rem;
 }
