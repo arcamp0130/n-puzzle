@@ -1,7 +1,7 @@
 @use 'color-scheme';
 $font-family: "Noto Sans", sans-serif;
 $mobile-breakpoint: 768px;
-
+$l-mobile-breakpoint: 425px;
 
 * {
     font-family: $font-family;
@@ -22,6 +22,11 @@ header {
     background-color: color-scheme.$secondary-color;
     padding: 1.5rem;
     margin-bottom: 2rem;
+    p {
+        margin: 0;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
 }
 
 main {
@@ -121,6 +126,23 @@ hr {
     border: 1px solid color-scheme.$stroke-color;
 }
 
-@media screen and (min-width: $mobile-breakpoint) {
-    // Modifiers to allow responsive layout
+@media screen and (max-width: $mobile-breakpoint) {
+    .game {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .canvas {
+        margin: 0 auto;
+    }
+}
+
+@media screen and (max-width: $l-mobile-breakpoint) {
+    .tutorial {
+        ul {
+            display: flex !important;
+            flex-direction: column;
+            gap: 1.5rem !important;
+        }
+    }
 }
