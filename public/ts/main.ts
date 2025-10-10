@@ -1,3 +1,5 @@
 import '@sass/styles.scss'
+import { htmlManager } from './managers/managers.index'
 
-console.log("Hello from Ts in client folder")
+// Getting instance of htmlManager
+const htmlMgr = htmlManager.Instance
