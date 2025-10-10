@@ -1,5 +1,6 @@
 import '@sass/styles.scss'
-import { htmlManager } from './managers/managers.index'
+import { htmlManager, gameManager } from './managers/managers.index'
 
-// Getting instance of htmlManager
-const htmlMgr = htmlManager.Instance
+// Initializing game by force-instatiating all classes
+htmlManager.Instance
+gameManager.Instance
