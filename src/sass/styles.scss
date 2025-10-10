@@ -151,6 +151,22 @@ h2 {
         text-align: center;
         margin: 0
     }
+
+    &[data-status="idle"] {
+        background-color: color-scheme.$alert-idle-color;
+    }
+
+    &[data-status="success"] {
+        background-color: color-scheme.$alert-success-color;
+    }
+
+    &[data-status="error"] {
+        background-color: color-scheme.$alert-error-color;
+    }
+
+    &[data-status="warning"] {
+        background-color: color-scheme.$alert-warning-color;
+    }
 }
 
 hr {
