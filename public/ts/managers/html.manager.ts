@@ -24,10 +24,13 @@ export default class htmlManager {
 
     private init(): void {
         this.generateGame()
+        this.appendButtonsListeners();
     }
 
     private generateGame(): void {
         const slot = document.createElement("span")
+        const lastSlotVal = this.boardSize * this.boardSize
+
         slot.classList.add("slot")
         this.board.innerHTML = ""
 
@@ -39,7 +42,7 @@ export default class htmlManager {
                 slot.dataset.y = `${i}`
                 slot.dataset.x = `${j}`
 
-                if (index !== this.boardSize * this.boardSize) {
+                if (index !== lastSlotVal) {
                     slot.innerHTML = `${index}`
                     slot.dataset.status = "fill"
                 } else {
@@ -50,5 +53,18 @@ export default class htmlManager {
 
             } // end x pos
         } // end y pos
+    }
+
+    private appendButtonsListeners() {
+        this.buttons["solve"].addEventListener("click", () =>
+            console.log("solve")
+        )
+        this.buttons["reset"].addEventListener("click", () =>
+            this.generateGame()
+        )
+        this.buttons["random"].addEventListener("click", () =>
+            console.log("random")
+        )
+
     }
 }
