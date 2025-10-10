@@ -1,17 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital@0;1&display=swap" rel="stylesheet">
     <title>A* search algorithm</title>
 </head>
+
 <body>
     <header>
-        <h1>A* search algorithm | n-puzzle </h1>
+        <h1>A* search</h1>
+        <p>15-puzzle</p>
     </header>
     <main>
-        This page intends to solve any valid 15-puzzle problem with A* search.
+        <div class="game container">
+            <div class="canvas container">
+                <div id="board">
+                    <!-- Board will be filled with 16 slots with two varations: empty and fill to handle empty slot -->
+                </div>
+            </div>
+
+            <div class="info container">
+                <div class="tutorial section">
+                    <h2>How to play</h2>
+                    <ul>
+                        <li>You can only move pieces that are next to the empty slot.</li>
+                        <li>Mix up all pieces in board to get algorithm to solve the game.</li>
+                        <li>Select a piece to move it to the empty slot.</li>
+                        <li>Board could mix up itself, try it out!</li>
+                    </ul>
+                </div>
+                <hr>
+                <div class="controls section">
+                    <button type="button" id="solve">Solve game</button>
+                    <button type="button" id="reset">Reset board</button>
+                    <button type="button" id="random">Randomly mix board</button>
+                </div>
+            </div>
+        </div>
+        <div class="alert container" data-status="idle">
+            <p id="message">Message or alert will apear here</p>
+        </div>
     </main>
 </body>
 <script type="module" src="./ts/main.ts"></script>
+
 </html>
