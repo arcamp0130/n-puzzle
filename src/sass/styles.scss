@@ -88,6 +88,13 @@ h2 {
         &[data-status="fill"] {
             background-color: color-scheme.$secondary-color;
             border-radius: 0.25rem;
+            transition: 200ms;
+
+            &:hover {
+                background-color: color-scheme.$hover-color;
+                font-weight: 700;
+                transition: 200ms;
+            }
         }
     }
 }
@@ -119,6 +126,12 @@ h2 {
             border-radius: 0.5rem;
             width: 100%;
             padding: 1rem;
+            transform: 200ms;
+
+            &:hover {
+                background-color: color-scheme.$hover-color;
+                transition: 200ms;
+            }
         }
     }
 }
