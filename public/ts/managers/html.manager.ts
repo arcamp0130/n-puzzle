@@ -1,3 +1,5 @@
+import { AlertStatus, SlotStatus } from "../types/html.types"
+
 export default class htmlManager {
     private static instance: htmlManager
     private board: HTMLElement
@@ -57,9 +59,9 @@ export default class htmlManager {
 
                 if (index !== lastSlotVal) {
                     slot.innerHTML = `${index}`
-                    slot.dataset.status = "fill"
+                    slot.dataset.status = SlotStatus.FILL
                 } else {
-                    slot.dataset.status = "empty"
+                    slot.dataset.status = SlotStatus.EMPTY
                 }
 
                 this.board.appendChild(slot.cloneNode(true))
@@ -73,7 +75,7 @@ export default class htmlManager {
     private addSlotsListeners() {
         const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
         slots.forEach(slot => {
-            if (slot.dataset.status !== "empty")
+            if (slot.dataset.status !== SlotStatus.EMPTY)
                 slot.addEventListener("click", () =>
                     console.log(`Piece ${slot.innerHTML} clicked` )
                 )
