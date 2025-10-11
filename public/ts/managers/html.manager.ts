@@ -34,7 +34,7 @@ export default class htmlManager {
         await new Promise(_ => setTimeout(_, this.stepDelay))
         console.log("Solving game")
     }
-    
+
     private async mixBoard(): Promise<void> {
         await new Promise(_ => setTimeout(_, this.stepDelay))
         console.log("Mixing board")
@@ -66,6 +66,18 @@ export default class htmlManager {
 
             } // end x pos
         } // end y pos
+
+        this.appendSlotsListeners()
+    }
+
+    private appendSlotsListeners() {
+        const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
+        slots.forEach(slot => {
+            if (slot.dataset.status !== "empty")
+                slot.addEventListener("click", () =>
+                    console.log(`Piece ${slot.innerHTML} clicked` )
+                )
+        })
     }
 
     private appendButtonsListeners() {
