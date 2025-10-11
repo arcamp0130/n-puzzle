@@ -56,13 +56,38 @@ export default class htmlManager {
     }
 
     private async solveGame(): Promise<void> {
-        await new Promise(_ => setTimeout(_, this.stepDelay))
-        console.log("Solving game")
+        this.toggleCover() // Covered
+        this.updateAlert({
+            status: AlertStatus.IDLE,
+            message: "Solving..."
+        } as Alert)
+
+        // Mock behaivor
+        await this.delay()
+
+        this.toggleCover() // Exposed
+
+        // Mock behaivor
+        this.updateAlert({
+            status: AlertStatus.SUCCESS,
+            message: "Solved!"
+        } as Alert)
     }
 
     private async mixBoard(): Promise<void> {
-        await new Promise(_ => setTimeout(_, this.stepDelay))
-        console.log("Mixing board")
+        this.toggleCover() // Covered
+        this.updateAlert({
+            status: AlertStatus.IDLE,
+            message: "Mixing..."
+        } as Alert)
+
+        // Mock behaivor
+        await this.delay()
+        this.toggleCover() // Exposed
+        this.updateAlert({
+            status: AlertStatus.IDLE,
+            message: "Mixed!"
+        } as Alert)
     }
 
     private restartGame(): void {
