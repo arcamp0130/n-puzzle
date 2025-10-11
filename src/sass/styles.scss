@@ -114,20 +114,14 @@ h2 {
 }
 
 #cover {
+    // Invisible cover
     // display: flex;
     display: none;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 100%;
-    background-color: color-scheme.$cover-color;
-    
-    p {
-        font-size: 1.5rem;
-        font-weight: 700;
-        text-align: center;
-        margin: 1.5rem;
-    }
+    background-color: none;
 }
 
 .info {
