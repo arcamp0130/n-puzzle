@@ -79,6 +79,7 @@ h2 {
     gap: 0.5rem;
 
     span.slot {
+        user-select: none;
         display: flex;
         justify-content: center;
         align-items: center;
