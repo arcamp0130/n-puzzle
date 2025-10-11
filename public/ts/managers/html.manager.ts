@@ -2,6 +2,7 @@ export default class htmlManager {
     private static instance: htmlManager
     private board: HTMLElement
     private boardSize: number = 4
+    public stepDelay: number = 100
     public readonly buttons: { [key: string]: HTMLButtonElement }
 
     // Private constructor to prevent direct instantiation
@@ -25,6 +26,18 @@ export default class htmlManager {
     private init(): void {
         this.generateGame()
         this.appendButtonsListeners();
+    }
+
+    // Mocking solve and mix delay
+
+    private async solveGame(): Promise<void> {
+        await new Promise(_ => setTimeout(_, this.stepDelay))
+        console.log("Solving game")
+    }
+    
+    private async mixBoard(): Promise<void> {
+        await new Promise(_ => setTimeout(_, this.stepDelay))
+        console.log("Mixing board")
     }
 
     private generateGame(): void {
@@ -56,14 +69,14 @@ export default class htmlManager {
     }
 
     private appendButtonsListeners() {
-        this.buttons["solve"].addEventListener("click", () =>
-            console.log("solve")
+        this.buttons["solve"].addEventListener("click", async () =>
+            await this.solveGame()
         )
         this.buttons["reset"].addEventListener("click", () =>
             this.generateGame()
         )
-        this.buttons["random"].addEventListener("click", () =>
-            console.log("random")
+        this.buttons["random"].addEventListener("click", async () =>
+            await this.mixBoard()
         )
 
     }
