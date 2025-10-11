@@ -1,6 +1,8 @@
+import { Board } from "../types/game.types"
+
 export default class gameManager {
     private static instance: gameManager
-    private board: number[][] = []
+    private board: Board = []
     private boardSize: number = 4
 
     // Private constructor to prevent direct instantiation
