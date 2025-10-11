@@ -62,18 +62,13 @@ export default class htmlManager {
     }
 
     private isValidSwap(empty: Slot, slot: Slot): boolean {
+        if (empty.value === slot.value) return false
+
         // Expand empty slot to find coincidence
-
-        // is y adjacent
-        if (empty.x === slot.x &&
-            (empty.y - 1 === slot.y || empty.y + 1 === slot.y))
+        if (empty.x === slot.x && (empty.y - 1 === slot.y || empty.y + 1 === slot.y) ||
+            empty.y === slot.y && (empty.x - 1 === slot.x || empty.x + 1 === slot.x))
             return true
 
-        // is x adjacent
-        if (empty.y === slot.y &&
-            (empty.x - 1 === slot.x || empty.x + 1 === slot.x))
-            return true
-        
         return false;
     }
 
