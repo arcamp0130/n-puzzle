@@ -64,7 +64,7 @@ export default class htmlManager {
     private isValidSwap(empty: Slot, slot: Slot): boolean {
         if (empty.value === slot.value) return false
 
-        // Expand empty slot to find coincidence
+        // Expand empty slot coordinates to find coincidence
         if (empty.x === slot.x && (empty.y - 1 === slot.y || empty.y + 1 === slot.y) ||
             empty.y === slot.y && (empty.x - 1 === slot.x || empty.x + 1 === slot.x))
             return true
@@ -91,13 +91,22 @@ export default class htmlManager {
             status: slot.dataset.status as SlotStatus
         }
 
-        if (!this.isValidSwap(emptySlot, slotPos)) return
+        if (!this.isValidSwap(emptySlot, slotPos)) {
+            const illegalMove: Alert = {
+                status: AlertStatus.WARNING,
+                message: `Can't move ${slotPos.value}`
+            }
+            this.updateAlert(illegalMove)
+            return
+        }
 
         empty.innerHTML = slotPos.value
         empty.dataset.status = slotPos.status
 
         slot.innerHTML = emptySlot.value
         slot.dataset.status = emptySlot.status
+
+        this.updateAlert(this.defaultAlert)
     }
 
     private updateAlert(newAlert: Alert) {
