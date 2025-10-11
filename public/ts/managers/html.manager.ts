@@ -25,7 +25,7 @@ export default class htmlManager {
 
     private init(): void {
         this.generateGame()
-        this.appendButtonsListeners();
+        this.addButtonsListeners();
     }
 
     // Mocking solve and mix delay
@@ -67,10 +67,10 @@ export default class htmlManager {
             } // end x pos
         } // end y pos
 
-        this.appendSlotsListeners()
+        this.addSlotsListeners()
     }
 
-    private appendSlotsListeners() {
+    private addSlotsListeners() {
         const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
         slots.forEach(slot => {
             if (slot.dataset.status !== "empty")
@@ -80,7 +80,7 @@ export default class htmlManager {
         })
     }
 
-    private appendButtonsListeners() {
+    private addButtonsListeners() {
         this.buttons["solve"].addEventListener("click", async () =>
             await this.solveGame()
         )
