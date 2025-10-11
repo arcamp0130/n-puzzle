@@ -61,6 +61,22 @@ export default class htmlManager {
         this.updateAlert(this.defaultAlert)
     }
 
+    private isValidSwap(empty: Slot, slot: Slot): boolean {
+        // Expand empty slot to find coincidence
+
+        // is y adjacent
+        if (empty.x === slot.x &&
+            (empty.y - 1 === slot.y || empty.y + 1 === slot.y))
+            return true
+
+        // is x adjacent
+        if (empty.y === slot.y &&
+            (empty.x - 1 === slot.x || empty.x + 1 === slot.x))
+            return true
+        
+        return false;
+    }
+
     private swapEmptyWith(slot: HTMLElement): void {
         const empty = this.board.querySelector(
             `span.slot[data-status="${SlotStatus.EMPTY}"]`
@@ -68,25 +84,23 @@ export default class htmlManager {
 
         // Used to temporary store original values
         const emptySlot: Slot = {
-            x: empty.dataset.x as string,
-            y: empty.dataset.y as string,
+            x: parseInt(empty.dataset.x as string),
+            y: parseInt(empty.dataset.y as string),
             value: empty.innerHTML,
-            status: SlotStatus.EMPTY
+            status: empty.dataset.status as SlotStatus
         }
         const slotPos: Slot = {
-            x: slot.dataset.x as string,
-            y: slot.dataset.y as string,
+            x: parseInt(slot.dataset.x as string),
+            y: parseInt(slot.dataset.y as string),
             value: slot.innerHTML,
-            status: SlotStatus.FILL
+            status: slot.dataset.status as SlotStatus
         }
 
-        empty.dataset.x = slotPos.x
-        empty.dataset.y = slotPos.y
+        if (!this.isValidSwap(emptySlot, slotPos)) return
+
         empty.innerHTML = slotPos.value
         empty.dataset.status = slotPos.status
 
-        slot.dataset.x = emptySlot.x
-        slot.dataset.y = emptySlot.y
         slot.innerHTML = emptySlot.value
         slot.dataset.status = emptySlot.status
     }

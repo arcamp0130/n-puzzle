@@ -16,8 +16,8 @@ export type Alert = {
 }
 
 export type Slot = {
-    x: string,
-    y: string,
+    x: number,
+    y: number,
     value: string,
     status: SlotStatus
 }
