@@ -1,9 +1,9 @@
-import { stat } from "fs"
 import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
 
 export default class htmlManager {
     private static instance: htmlManager
-    private board: HTMLElement
+    public static stepDelay: number = 100
+    
     private boardSize: number = 4
     private defaultAlert: Alert = {
         status: AlertStatus.IDLE,
@@ -13,8 +13,9 @@ export default class htmlManager {
         container: HTMLElement,
         message: HTMLElement
     }
-    public readonly buttons: { [key: string]: HTMLButtonElement }
-    public stepDelay: number = 100
+    private readonly board: HTMLElement
+    private readonly cover: HTMLElement
+    private readonly buttons: { [key: string]: HTMLButtonElement }
 
     // Private constructor to prevent direct instantiation
     private constructor() {
@@ -28,6 +29,7 @@ export default class htmlManager {
             container: document.querySelector(".alert") as HTMLElement,
             message: document.querySelector("#message") as HTMLElement
         }
+        this.cover = document.querySelector("#cover") as HTMLElement,
         this.init()
     }
 
@@ -44,7 +46,14 @@ export default class htmlManager {
         this.updateAlert(this.defaultAlert)
     }
 
-    // Mocking solve and mix delay
+    private async delay(ms: number | null = null): Promise<void> {
+        return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
+    }
+
+    private toggleCover(message: string | null = null): void {
+        this.cover.style.display
+        = this.cover.style.display === "flex" ? "none" : "flex"
+    }
 
     private async solveGame(): Promise<void> {
         await new Promise(_ => setTimeout(_, this.stepDelay))
