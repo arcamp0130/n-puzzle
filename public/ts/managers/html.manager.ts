@@ -1,4 +1,5 @@
-import { Alert, AlertStatus, SlotStatus } from "../types/html.types"
+import { stat } from "fs"
+import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
 
 export default class htmlManager {
     private static instance: htmlManager
@@ -60,6 +61,35 @@ export default class htmlManager {
         this.updateAlert(this.defaultAlert)
     }
 
+    private swapEmptyWith(slot: HTMLElement): void {
+        const empty = this.board.querySelector(
+            `span.slot[data-status="${SlotStatus.EMPTY}"]`
+        ) as HTMLElement
+
+        // Used to temporary store original values
+        const emptySlot: Slot = {
+            x: empty.dataset.x as string,
+            y: empty.dataset.y as string,
+            value: empty.innerHTML,
+            status: SlotStatus.EMPTY
+        }
+        const slotPos: Slot = {
+            x: slot.dataset.x as string,
+            y: slot.dataset.y as string,
+            value: slot.innerHTML,
+            status: SlotStatus.FILL
+        }
+
+        empty.dataset.x = slotPos.x
+        empty.dataset.y = slotPos.y
+        empty.innerHTML = slotPos.value
+        empty.dataset.status = slotPos.status
+
+        slot.dataset.x = emptySlot.x
+        slot.dataset.y = emptySlot.y
+        slot.innerHTML = emptySlot.value
+        slot.dataset.status = emptySlot.status
+    }
 
     private updateAlert(newAlert: Alert) {
         this.alert.container.dataset.status = newAlert.status
@@ -99,10 +129,9 @@ export default class htmlManager {
     private addSlotsListeners() {
         const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
         slots.forEach(slot => {
-            if (slot.dataset.status !== SlotStatus.EMPTY)
-                slot.addEventListener("click", () =>
-                    console.log(`Piece ${slot.innerHTML} clicked`)
-                )
+            slot.addEventListener("click", () =>
+                this.swapEmptyWith(slot)
+            )
         })
     }
 
