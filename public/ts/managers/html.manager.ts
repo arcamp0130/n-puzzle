@@ -1,11 +1,19 @@
-import { AlertStatus, SlotStatus } from "../types/html.types"
+import { Alert, AlertStatus, SlotStatus } from "../types/html.types"
 
 export default class htmlManager {
     private static instance: htmlManager
     private board: HTMLElement
     private boardSize: number = 4
-    public stepDelay: number = 100
+    private defaultAlert: Alert = {
+        status: AlertStatus.IDLE,
+        message: "Start playing!"
+    }
+    private readonly alert: {
+        container: HTMLElement,
+        message: HTMLElement
+    }
     public readonly buttons: { [key: string]: HTMLButtonElement }
+    public stepDelay: number = 100
 
     // Private constructor to prevent direct instantiation
     private constructor() {
@@ -14,6 +22,10 @@ export default class htmlManager {
             "solve": document.querySelector("button#solve") as HTMLButtonElement,
             "reset": document.querySelector("button#reset") as HTMLButtonElement,
             "random": document.querySelector("button#random") as HTMLButtonElement,
+        }
+        this.alert = {
+            container: document.querySelector(".alert") as HTMLElement,
+            message: document.querySelector("#message") as HTMLElement
         }
         this.init()
     }
@@ -27,7 +39,8 @@ export default class htmlManager {
 
     private init(): void {
         this.generateGame()
-        this.addButtonsListeners();
+        this.addButtonsListeners()
+        this.updateAlert(this.defaultAlert)
     }
 
     // Mocking solve and mix delay
@@ -40,6 +53,11 @@ export default class htmlManager {
     private async mixBoard(): Promise<void> {
         await new Promise(_ => setTimeout(_, this.stepDelay))
         console.log("Mixing board")
+    }
+
+    private updateAlert(newAlert: Alert) {
+        this.alert.container.dataset.status = newAlert.status
+        this.alert.message.innerHTML = newAlert.message
     }
 
     private generateGame(): void {
@@ -77,7 +95,7 @@ export default class htmlManager {
         slots.forEach(slot => {
             if (slot.dataset.status !== SlotStatus.EMPTY)
                 slot.addEventListener("click", () =>
-                    console.log(`Piece ${slot.innerHTML} clicked` )
+                    console.log(`Piece ${slot.innerHTML} clicked`)
                 )
         })
     }
