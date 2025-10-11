@@ -1,10 +1,7 @@
-import { htmlManager } from "./managers.index"
-
 export default class gameManager {
     private static instance: gameManager
     private board: number[][] = []
     private boardSize: number = 4
-    private htmlMgr: htmlManager = htmlManager.Instance
 
     // Private constructor to prevent direct instantiation
     private constructor() {
@@ -17,5 +14,4 @@ export default class gameManager {
         }
         return gameManager.instance
     }
-
 }
