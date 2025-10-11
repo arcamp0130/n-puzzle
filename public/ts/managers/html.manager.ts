@@ -55,6 +55,12 @@ export default class htmlManager {
         console.log("Mixing board")
     }
 
+    private restartGame(): void {
+        this.generateGame()
+        this.updateAlert(this.defaultAlert)
+    }
+
+
     private updateAlert(newAlert: Alert) {
         this.alert.container.dataset.status = newAlert.status
         this.alert.message.innerHTML = newAlert.message
@@ -105,7 +111,7 @@ export default class htmlManager {
             await this.solveGame()
         )
         this.buttons["reset"].addEventListener("click", () =>
-            this.generateGame()
+            this.restartGame()
         )
         this.buttons["random"].addEventListener("click", async () =>
             await this.mixBoard()
