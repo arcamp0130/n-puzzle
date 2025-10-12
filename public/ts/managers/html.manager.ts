@@ -130,6 +130,13 @@ export default class htmlManager {
 
     private async mixBoard(): Promise<void> {
         const mixMoves: number = parseInt(this.movesInput.value)
+        if (isNaN(mixMoves) || mixMoves <= 0 || mixMoves > 1000) {
+            this.updateAlert({
+                status: AlertStatus.ERROR,
+                message: `Moves must be a number between 1 and 1000`
+            } as Alert)
+            return
+        }
 
         this.toggleInputs() // Disable
         this.updateAlert({
