@@ -35,6 +35,8 @@ export default class htmlManager {
             this.init()
     }
 
+
+    // Core methods
     public static get Instance(): htmlManager {
         if (!htmlManager.instance) {
             htmlManager.instance = new htmlManager()
@@ -48,14 +50,61 @@ export default class htmlManager {
         this.updateAlert(this.defaultAlert)
     }
 
-    private async delay(ms: number | null = null): Promise<void> {
-        return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
+    private generateGame(): void {
+        const slot = document.createElement("span")
+        const lastSlotVal = this.boardSize * this.boardSize
+
+        slot.classList.add("slot")
+        this.board.innerHTML = ""
+
+        // Generating gameboard
+        for (let i = 0; i < this.boardSize; i++) { // y possition
+            for (let j = 0; j < this.boardSize; j++) { // x possition
+                const index = (i * this.boardSize) + (j + 1)
+                slot.innerHTML = ""
+                slot.dataset.y = `${i}`
+                slot.dataset.x = `${j}`
+
+                if (index !== lastSlotVal) {
+                    slot.innerHTML = `${index}`
+                    slot.dataset.status = SlotStatus.FILL
+                } else {
+                    slot.dataset.status = SlotStatus.EMPTY
+                }
+
+                this.board.appendChild(slot.cloneNode(true))
+
+            } // end x pos
+        } // end y pos
+
+        this.addSlotsListeners()
     }
 
-    private randomInt(min: number, max: number): number {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // Listeners
+    private addSlotsListeners() {
+        const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
+        slots.forEach(slot => {
+            slot.addEventListener("click", () =>
+                this.swapEmptyWith(slot)
+            )
+        })
     }
 
+    private addButtonsListeners() {
+        this.buttons["solve"].addEventListener("click", async () =>
+            await this.solveGame()
+        )
+        this.buttons["reset"].addEventListener("click", () =>
+            this.restartGame()
+        )
+        this.buttons["random"].addEventListener("click", async () =>
+            await this.mixBoard()
+        )
+    }
+
+
+    // Toggle
     private toggleCover(): void {
         this.cover.style.display
             = this.cover.style.display === "flex" ? "none" : "flex"
@@ -67,6 +116,21 @@ export default class htmlManager {
             this.buttons[button].disabled = !this.buttons[button].disabled
         }
         this.toggleCover();
+    }
+
+
+    // Helpers
+    private async delay(ms: number | null = null): Promise<void> {
+        return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
+    }
+
+    private randomInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    private updateAlert(newAlert: Alert) {
+        this.alert.container.dataset.status = newAlert.status
+        this.alert.message.innerHTML = newAlert.message
     }
 
     private expandEmpty(empty: SlotCoords): Array<SlotCoords> {
@@ -87,76 +151,6 @@ export default class htmlManager {
         }
 
         return expanded
-    }
-
-    private async solveGame(): Promise<void> {
-        this.toggleInputs() // Disabled
-        this.updateAlert({
-            status: AlertStatus.IDLE,
-            message: "Solving..."
-        } as Alert)
-
-        // Mock behaivor
-        await this.delay(1000)
-
-        this.toggleInputs() // Enabled
-
-        // Mock behaivor
-        this.updateAlert({
-            status: AlertStatus.SUCCESS,
-            message: "Solved!"
-        } as Alert)
-    }
-
-    private async randomMix(): Promise<void> {
-        const emptySlot = this.board.querySelector(
-            `span.slot[data-status="${SlotStatus.EMPTY}"]`
-        ) as HTMLElement
-        const coords: SlotCoords = {
-            x: parseInt(emptySlot.dataset.x as string),
-            y: parseInt(emptySlot.dataset.y as string)
-        }
-        const expanded: Array<SlotCoords> = this.expandEmpty(coords)
-        const randIndex = this.randomInt(0, expanded.length - 1)
-        const randSlot = this.board.querySelector(
-            `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
-        ) as HTMLElement
-
-        // Skip valid movement because of 'expandEmpty' return 
-        this.swapEmptyWith(randSlot, false)
-
-        await this.delay()  // Prevent UI to lock
-    }
-
-    private async mixBoard(): Promise<void> {
-        const mixMoves: number = parseInt(this.movesInput.value)
-        if (isNaN(mixMoves) || mixMoves <= 0 || mixMoves > 1000) {
-            this.updateAlert({
-                status: AlertStatus.ERROR,
-                message: `Moves must be a number between 1 and 1000`
-            } as Alert)
-            return
-        }
-
-        this.toggleInputs() // Disable
-        this.updateAlert({
-            status: AlertStatus.IDLE,
-            message: `Moving board ${mixMoves} times` 
-        } as Alert)
-
-        for (let i = 0; i < mixMoves; i++)
-            await this.randomMix()
-
-        this.toggleInputs() // Enabled
-        this.updateAlert({
-            status: AlertStatus.IDLE,
-            message: "Mixed!"
-        } as Alert)
-    }
-
-    private restartGame(): void {
-        this.generateGame()
-        this.updateAlert(this.defaultAlert)
     }
 
     private isValidSwap(empty: Slot, slot: Slot): boolean {
@@ -212,65 +206,79 @@ export default class htmlManager {
 
         slot.innerHTML = emptySlot.value
         slot.dataset.status = emptySlot.status
-        
+
         if (fromClient)
             this.updateAlert(this.defaultAlert)
     }
 
-    private updateAlert(newAlert: Alert) {
-        this.alert.container.dataset.status = newAlert.status
-        this.alert.message.innerHTML = newAlert.message
+    private async randomMix(): Promise<void> {
+        const emptySlot = this.board.querySelector(
+            `span.slot[data-status="${SlotStatus.EMPTY}"]`
+        ) as HTMLElement
+        const coords: SlotCoords = {
+            x: parseInt(emptySlot.dataset.x as string),
+            y: parseInt(emptySlot.dataset.y as string)
+        }
+        const expanded: Array<SlotCoords> = this.expandEmpty(coords)
+        const randIndex = this.randomInt(0, expanded.length - 1)
+        const randSlot = this.board.querySelector(
+            `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
+        ) as HTMLElement
+
+        // Skip valid movement because of 'expandEmpty' return 
+        this.swapEmptyWith(randSlot, false)
+
+        await this.delay()  // Prevent UI to lock
     }
 
-    private generateGame(): void {
-        const slot = document.createElement("span")
-        const lastSlotVal = this.boardSize * this.boardSize
+    // Actions
+    private async solveGame(): Promise<void> {
+        this.toggleInputs() // Disabled
+        this.updateAlert({
+            status: AlertStatus.IDLE,
+            message: "Solving..."
+        } as Alert)
 
-        slot.classList.add("slot")
-        this.board.innerHTML = ""
+        // Mock behaivor
+        await this.delay(1000)
 
-        // Generating gameboard
-        for (let i = 0; i < this.boardSize; i++) { // y possition
-            for (let j = 0; j < this.boardSize; j++) { // x possition
-                const index = (i * this.boardSize) + (j + 1)
-                slot.innerHTML = ""
-                slot.dataset.y = `${i}`
-                slot.dataset.x = `${j}`
+        this.toggleInputs() // Enabled
 
-                if (index !== lastSlotVal) {
-                    slot.innerHTML = `${index}`
-                    slot.dataset.status = SlotStatus.FILL
-                } else {
-                    slot.dataset.status = SlotStatus.EMPTY
-                }
-
-                this.board.appendChild(slot.cloneNode(true))
-
-            } // end x pos
-        } // end y pos
-
-        this.addSlotsListeners()
+        // Mock behaivor
+        this.updateAlert({
+            status: AlertStatus.SUCCESS,
+            message: "Solved!"
+        } as Alert)
     }
 
-    private addSlotsListeners() {
-        const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
-        slots.forEach(slot => {
-            slot.addEventListener("click", () =>
-                this.swapEmptyWith(slot)
-            )
-        })
+    private restartGame(): void {
+        this.generateGame()
+        this.updateAlert(this.defaultAlert)
     }
 
-    private addButtonsListeners() {
-        this.buttons["solve"].addEventListener("click", async () =>
-            await this.solveGame()
-        )
-        this.buttons["reset"].addEventListener("click", () =>
-            this.restartGame()
-        )
-        this.buttons["random"].addEventListener("click", async () =>
-            await this.mixBoard()
-        )
+    private async mixBoard(): Promise<void> {
+        const mixMoves: number = parseInt(this.movesInput.value)
+        if (isNaN(mixMoves) || mixMoves <= 0 || mixMoves > 1000) {
+            this.updateAlert({
+                status: AlertStatus.ERROR,
+                message: `Moves must be a number between 1 and 1000`
+            } as Alert)
+            return
+        }
 
+        this.toggleInputs() // Disable
+        this.updateAlert({
+            status: AlertStatus.IDLE,
+            message: `Moving board ${mixMoves} times`
+        } as Alert)
+
+        for (let i = 0; i < mixMoves; i++)
+            await this.randomMix()
+
+        this.toggleInputs() // Enabled
+        this.updateAlert({
+            status: AlertStatus.IDLE,
+            message: "Mixed!"
+        } as Alert)
     }
 }
