@@ -119,7 +119,9 @@ export default class htmlManager {
         const randSlot = this.board.querySelector(
             `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
         ) as HTMLElement
-        this.swapEmptyWith(randSlot)
+
+        // Skip valid movement because of 'expandEmpty' return 
+        this.swapEmptyWith(randSlot, false)
 
         await this.delay()  // Prevent UI to lock
     }
@@ -157,7 +159,7 @@ export default class htmlManager {
         return false;
     }
 
-    private swapEmptyWith(slot: HTMLElement): void {
+    private swapEmptyWith(slot: HTMLElement, verify: boolean = true): void {
         const empty = this.board.querySelector(
             `span.slot[data-status="${SlotStatus.EMPTY}"]`
         ) as HTMLElement
@@ -175,7 +177,7 @@ export default class htmlManager {
             value: slot.innerHTML,
             status: slot.dataset.status as SlotStatus
         }
-
+        if (verify)
         if (!this.isValidSwap(emptySlot, slotPos)) {
             const illegalMove: Alert = {
                 status: AlertStatus.WARNING,
