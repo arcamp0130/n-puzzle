@@ -145,24 +145,44 @@ h2 {
         gap: 1rem;
         padding: 0 2rem;
 
-        button {
-            background-color: color-scheme.$secondary-color;
-            border: 1px solid color-scheme.$stroke-color;
-            border-radius: 0.5rem;
-            width: 100%;
-            padding: 1rem;
-            transform: 200ms;
+        .action {
+            display: flex;
+            flex-direction: row;
+            gap: 0.75rem;
+            justify-content: center;
+            align-items: center;
 
-            &:hover {
-                background-color: color-scheme.$hover-color;
-                transition: 200ms;
-            }
-
-            &:disabled {
-                background-color: color-scheme.$disabled-color;
+            input {
+                padding: 1rem;
             }
         }
     }
+}
+
+button {
+    background-color: color-scheme.$secondary-color;
+    border: 1px solid color-scheme.$stroke-color;
+    border-radius: 0.5rem;
+    width: 100%;
+    padding: 1rem;
+    transform: 200ms;
+
+    &:hover {
+        background-color: color-scheme.$hover-color;
+        transition: 200ms;
+    }
+
+    &:disabled {
+        background-color: color-scheme.$disabled-color;
+    }
+}
+
+input {
+    background-color: color-scheme.$secondary-color;
+    border: 1px solid color-scheme.$stroke-color;
+    border-radius: 0.5rem;
+    height: 100%;
+    text-align: center;
 }
 
 .alert {

@@ -38,9 +38,17 @@
                 </div>
                 <hr>
                 <div class="controls section">
-                    <button type="button" id="solve">Solve game</button>
-                    <button type="button" id="reset">Reset board</button>
-                    <button type="button" id="random">Randomly mix board</button>
+                    <div class="action container">
+                        <button type="button" id="solve">Solve game</button>
+                    </div>
+                    <div class="action container">
+                        <button type="button" id="reset">Reset board</button>
+                    </div>
+                    <div class="action container">
+                        <button type="button" id="random">Randomly mix board</button>
+                        <label for="mix-moves">x</label>
+                        <input type="number" name="game-conf" id="mix-moves" value="100" min="1" max="1000" step="1">
+                    </div>
                 </div>
             </div>
         </div>
