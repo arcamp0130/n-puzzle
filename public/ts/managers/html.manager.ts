@@ -133,7 +133,7 @@ export default class htmlManager {
             message: "Mixing..."
         } as Alert)
 
-        for (let i = 0; i < this.mixMoves; i++) 
+        for (let i = 0; i < this.mixMoves; i++)
             await this.randomMix()
 
         this.toggleInputs() // Enabled
@@ -151,10 +151,19 @@ export default class htmlManager {
     private isValidSwap(empty: Slot, slot: Slot): boolean {
         if (empty.value === slot.value) return false
 
-        // Expand empty slot coordinates to find coincidence
-        if (empty.x === slot.x && (empty.y - 1 === slot.y || empty.y + 1 === slot.y) ||
-            empty.y === slot.y && (empty.x - 1 === slot.x || empty.x + 1 === slot.x))
-            return true
+        const slotCoords: SlotCoords = {
+            x: slot.x,
+            y: slot.y
+        } as SlotCoords
+
+        const neigbhors: Array<SlotCoords> = this.expandEmpty({
+            x: empty.x,
+            y: empty.y
+        } as SlotCoords)
+
+        for (const slot of neigbhors)
+            if (slot.x === slotCoords.x && slot.y === slotCoords.y)
+                return true
 
         return false;
     }
@@ -178,14 +187,14 @@ export default class htmlManager {
             status: slot.dataset.status as SlotStatus
         }
         if (verify)
-        if (!this.isValidSwap(emptySlot, slotPos)) {
-            const illegalMove: Alert = {
-                status: AlertStatus.WARNING,
-                message: `Can't move ${slotPos.value}`
+            if (!this.isValidSwap(emptySlot, slotPos)) {
+                const illegalMove: Alert = {
+                    status: AlertStatus.WARNING,
+                    message: `Can't move ${slotPos.value}`
+                }
+                this.updateAlert(illegalMove)
+                return
             }
-            this.updateAlert(illegalMove)
-            return
-        }
 
         empty.innerHTML = slotPos.value
         empty.dataset.status = slotPos.status
