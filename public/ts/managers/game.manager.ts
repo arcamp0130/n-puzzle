@@ -7,6 +7,12 @@ export default class GameManager {
     private board: Board = []
     private boardSize: number = 4
 
+    public static defaultGoal: Board =
+       [[1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+        [13, 14, 15, 0]]
+
     // Private constructor to prevent direct instantiation
     private constructor() {
 
@@ -19,7 +25,7 @@ export default class GameManager {
         return GameManager.instance
     }
 
-    public async solve(): Promise<GameResponse> {
+    public async solve(problem: Problem): Promise<GameResponse> {
         const pQueue = new PQueue<Board>()
 
         // Mock behaivor

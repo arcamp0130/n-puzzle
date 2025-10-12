@@ -1,4 +1,5 @@
 import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
+import { Board } from "../types/game.types"
 import { Problem } from "../classes/classes.index"
 import { GameResponse } from "../types/game.types"
 import { GameManager } from "./managers.index"
@@ -258,6 +259,31 @@ export default class HTMLManager {
         await HTMLManager.delay()  // Prevent UI to lock
     }
 
+    private getBoardMatrix(): Board {
+        const slots: NodeListOf<HTMLSpanElement>
+            = this.board.querySelectorAll(
+                "span.slot"
+            ) as NodeListOf<HTMLSpanElement>
+
+        // Initialize matrix with an n*n matrix
+        const matrix: Board =
+            Array(this.boardSize).fill(0).map(() =>
+                Array(this.boardSize).fill(0))
+
+
+        for (const slot of slots) {
+            const coords: SlotCoords = {
+                x: parseInt(slot.dataset.x as string),
+                y: parseInt(slot.dataset.y as string)
+            } as SlotCoords
+            const val = parseInt(slot.innerHTML) || 0
+
+            matrix[coords.y][coords.x] = val
+        }
+
+        return matrix
+    }
+
     /** ACTIONS
      * These methods are called when solve, restart and mix buttons are
      * pressed. May be called more than once, but they only have a single
@@ -272,8 +298,10 @@ export default class HTMLManager {
             message: "Solving..."
         } as Alert)
 
-        // Mock behaivor
-        const res: GameResponse = await GameMgr.solve()
+        const res: GameResponse = await GameMgr.solve(new Problem(
+            this.getBoardMatrix(),
+            this.boardSize,
+        ))
 
         this.toggleInputs() // Enabled
 
