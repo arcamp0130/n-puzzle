@@ -5,7 +5,7 @@ export default class htmlManager {
     public static stepDelay: number = 200
 
     private boardSize: number = 4
-    private mixMoves: number = 20
+    private mixMoves: number = 100
     private defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
@@ -49,6 +49,10 @@ export default class htmlManager {
 
     private async delay(ms: number | null = null): Promise<void> {
         return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
+    }
+
+    private randomInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     private toggleCover(): void {
@@ -119,8 +123,13 @@ export default class htmlManager {
                 y: parseInt(emptySlot.dataset.y as string)
             }
             const expanded: Array<SlotCoords> = this.expandEmpty(coords)
-            console.log(expanded)
-            await this.delay()
+            const randIndex = this.randomInt(0, expanded.length - 1)
+            const randSlot = this.board.querySelector(
+                `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
+            ) as HTMLElement
+            this.swapEmptyWith(randSlot)
+
+            await this.delay()  // Prevent UI to lock
         }
 
         this.toggleInputs() // Enabled
