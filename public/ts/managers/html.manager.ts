@@ -2,8 +2,8 @@ import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.
 
 export default class htmlManager {
     private static instance: htmlManager
-    public static stepDelay: number = 100
-    
+    public static stepDelay: number = 200
+
     private boardSize: number = 4
     private mixMoves: number = 20
     private defaultAlert: Alert = {
@@ -31,7 +31,7 @@ export default class htmlManager {
             message: document.querySelector("#message") as HTMLElement
         }
         this.cover = document.querySelector("#cover") as HTMLElement,
-        this.init()
+            this.init()
     }
 
     public static get Instance(): htmlManager {
@@ -53,7 +53,7 @@ export default class htmlManager {
 
     private toggleCover(): void {
         this.cover.style.display
-        = this.cover.style.display === "flex" ? "none" : "flex"
+            = this.cover.style.display === "flex" ? "none" : "flex"
     }
 
     private toggleInputs() {
@@ -110,7 +110,19 @@ export default class htmlManager {
         } as Alert)
 
         // Mock behaivor
-        await this.delay(1000)
+        for (let i = 0; i < this.mixMoves; i++) {
+            const emptySlot = this.board.querySelector(
+                `span.slot[data-status="${SlotStatus.EMPTY}"]`
+            ) as HTMLElement
+            const coords: SlotCoords = {
+                x: parseInt(emptySlot.dataset.x as string),
+                y: parseInt(emptySlot.dataset.y as string)
+            }
+            const expanded: Array<SlotCoords> = this.expandEmpty(coords)
+            console.log(expanded)
+            await this.delay()
+        }
+
         this.toggleInputs() // Enabled
         this.updateAlert({
             status: AlertStatus.IDLE,
