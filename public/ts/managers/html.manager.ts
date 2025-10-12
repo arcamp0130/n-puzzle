@@ -106,6 +106,24 @@ export default class htmlManager {
         } as Alert)
     }
 
+    private async randomMix(): Promise<void> {
+        const emptySlot = this.board.querySelector(
+            `span.slot[data-status="${SlotStatus.EMPTY}"]`
+        ) as HTMLElement
+        const coords: SlotCoords = {
+            x: parseInt(emptySlot.dataset.x as string),
+            y: parseInt(emptySlot.dataset.y as string)
+        }
+        const expanded: Array<SlotCoords> = this.expandEmpty(coords)
+        const randIndex = this.randomInt(0, expanded.length - 1)
+        const randSlot = this.board.querySelector(
+            `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
+        ) as HTMLElement
+        this.swapEmptyWith(randSlot)
+
+        await this.delay()  // Prevent UI to lock
+    }
+
     private async mixBoard(): Promise<void> {
         this.toggleInputs() // Disable
         this.updateAlert({
@@ -113,24 +131,8 @@ export default class htmlManager {
             message: "Mixing..."
         } as Alert)
 
-        // Mock behaivor
-        for (let i = 0; i < this.mixMoves; i++) {
-            const emptySlot = this.board.querySelector(
-                `span.slot[data-status="${SlotStatus.EMPTY}"]`
-            ) as HTMLElement
-            const coords: SlotCoords = {
-                x: parseInt(emptySlot.dataset.x as string),
-                y: parseInt(emptySlot.dataset.y as string)
-            }
-            const expanded: Array<SlotCoords> = this.expandEmpty(coords)
-            const randIndex = this.randomInt(0, expanded.length - 1)
-            const randSlot = this.board.querySelector(
-                `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
-            ) as HTMLElement
-            this.swapEmptyWith(randSlot)
-
-            await this.delay()  // Prevent UI to lock
-        }
+        for (let i = 0; i < this.mixMoves; i++) 
+            await this.randomMix()
 
         this.toggleInputs() // Enabled
         this.updateAlert({
