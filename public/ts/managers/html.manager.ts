@@ -1,10 +1,11 @@
-import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
+import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
 
 export default class htmlManager {
     private static instance: htmlManager
     public static stepDelay: number = 100
     
     private boardSize: number = 4
+    private mixMoves: number = 20
     private defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
@@ -60,6 +61,26 @@ export default class htmlManager {
             this.buttons[button].disabled = !this.buttons[button].disabled
         }
         this.toggleCover();
+    }
+
+    private expandEmpty(empty: SlotCoords): Array<SlotCoords> {
+        const neigbhors: Array<SlotCoords> = [
+            { x: empty.x - 1, y: empty.y } as SlotCoords,
+            { x: empty.x + 1, y: empty.y } as SlotCoords,
+            { x: empty.x, y: empty.y - 1 } as SlotCoords,
+            { x: empty.x, y: empty.y + 1 } as SlotCoords
+        ]
+
+        const expanded: Array<SlotCoords> = []
+        for (const slot of neigbhors) {
+            if (slot.x < 0 || slot.x >= this.boardSize ||
+                slot.y < 0 || slot.y >= this.boardSize)
+                continue
+
+            expanded.push(slot)
+        }
+
+        return expanded
     }
 
     private async solveGame(): Promise<void> {
