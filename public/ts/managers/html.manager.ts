@@ -5,7 +5,6 @@ export default class htmlManager {
     public static stepDelay: number = 200
 
     private boardSize: number = 4
-    private mixMoves: number
     private defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
@@ -28,7 +27,6 @@ export default class htmlManager {
             "reset": document.querySelector("button#reset") as HTMLButtonElement,
             "random": document.querySelector("button#random") as HTMLButtonElement,
         }
-        this.mixMoves = parseInt(this.movesInput.value) || 100
         this.alert = {
             container: document.querySelector(".alert") as HTMLElement,
             message: document.querySelector("#message") as HTMLElement
@@ -64,6 +62,7 @@ export default class htmlManager {
     }
 
     private toggleInputs() {
+        this.movesInput.disabled = !this.movesInput.disabled
         for (const button in this.buttons) {
             this.buttons[button].disabled = !this.buttons[button].disabled
         }
@@ -130,13 +129,15 @@ export default class htmlManager {
     }
 
     private async mixBoard(): Promise<void> {
+        const mixMoves: number = parseInt(this.movesInput.value)
+
         this.toggleInputs() // Disable
         this.updateAlert({
             status: AlertStatus.IDLE,
-            message: "Mixing..."
+            message: `Moving board ${mixMoves} times` 
         } as Alert)
 
-        for (let i = 0; i < this.mixMoves; i++)
+        for (let i = 0; i < mixMoves; i++)
             await this.randomMix()
 
         this.toggleInputs() // Enabled
@@ -171,7 +172,7 @@ export default class htmlManager {
         return false;
     }
 
-    private swapEmptyWith(slot: HTMLElement, verify: boolean = true): void {
+    private swapEmptyWith(slot: HTMLElement, fromClient: boolean = true): void {
         const empty = this.board.querySelector(
             `span.slot[data-status="${SlotStatus.EMPTY}"]`
         ) as HTMLElement
@@ -189,7 +190,7 @@ export default class htmlManager {
             value: slot.innerHTML,
             status: slot.dataset.status as SlotStatus
         }
-        if (verify)
+        if (fromClient)
             if (!this.isValidSwap(emptySlot, slotPos)) {
                 const illegalMove: Alert = {
                     status: AlertStatus.WARNING,
@@ -204,8 +205,9 @@ export default class htmlManager {
 
         slot.innerHTML = emptySlot.value
         slot.dataset.status = emptySlot.status
-
-        this.updateAlert(this.defaultAlert)
+        
+        if (fromClient)
+            this.updateAlert(this.defaultAlert)
     }
 
     private updateAlert(newAlert: Alert) {
