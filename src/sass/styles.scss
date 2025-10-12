@@ -157,6 +157,10 @@ h2 {
                 background-color: color-scheme.$hover-color;
                 transition: 200ms;
             }
+
+            &:disabled {
+                background-color: color-scheme.$disabled-color;
+            }
         }
     }
 }
