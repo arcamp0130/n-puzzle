@@ -166,15 +166,6 @@ button {
     width: 100%;
     padding: 1rem;
     transform: 200ms;
-
-    &:hover {
-        background-color: color-scheme.$hover-color;
-        transition: 200ms;
-    }
-
-    &:disabled {
-        background-color: color-scheme.$disabled-color;
-    }
 }
 
 input {
@@ -183,6 +174,18 @@ input {
     border-radius: 0.5rem;
     height: 100%;
     text-align: center;
+}
+
+button,
+input {
+    &:hover {
+        background-color: color-scheme.$hover-color;
+        transition: 200ms;
+    }
+
+    &:disabled {
+        background-color: color-scheme.$disabled-color;
+    }
 }
 
 .alert {
