@@ -1,10 +1,11 @@
-import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
+import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
 
 export default class htmlManager {
     private static instance: htmlManager
-    public static stepDelay: number = 100
-    
+    public static stepDelay: number = 200
+
     private boardSize: number = 4
+    private mixMoves: number = 100
     private defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
@@ -30,7 +31,7 @@ export default class htmlManager {
             message: document.querySelector("#message") as HTMLElement
         }
         this.cover = document.querySelector("#cover") as HTMLElement,
-        this.init()
+            this.init()
     }
 
     public static get Instance(): htmlManager {
@@ -50,9 +51,13 @@ export default class htmlManager {
         return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
     }
 
+    private randomInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
     private toggleCover(): void {
         this.cover.style.display
-        = this.cover.style.display === "flex" ? "none" : "flex"
+            = this.cover.style.display === "flex" ? "none" : "flex"
     }
 
     private toggleInputs() {
@@ -60,6 +65,26 @@ export default class htmlManager {
             this.buttons[button].disabled = !this.buttons[button].disabled
         }
         this.toggleCover();
+    }
+
+    private expandEmpty(empty: SlotCoords): Array<SlotCoords> {
+        const neigbhors: Array<SlotCoords> = [
+            { x: empty.x - 1, y: empty.y } as SlotCoords,
+            { x: empty.x + 1, y: empty.y } as SlotCoords,
+            { x: empty.x, y: empty.y - 1 } as SlotCoords,
+            { x: empty.x, y: empty.y + 1 } as SlotCoords
+        ]
+
+        const expanded: Array<SlotCoords> = []
+        for (const slot of neigbhors) {
+            if (slot.x < 0 || slot.x >= this.boardSize ||
+                slot.y < 0 || slot.y >= this.boardSize)
+                continue
+
+            expanded.push(slot)
+        }
+
+        return expanded
     }
 
     private async solveGame(): Promise<void> {
@@ -81,6 +106,26 @@ export default class htmlManager {
         } as Alert)
     }
 
+    private async randomMix(): Promise<void> {
+        const emptySlot = this.board.querySelector(
+            `span.slot[data-status="${SlotStatus.EMPTY}"]`
+        ) as HTMLElement
+        const coords: SlotCoords = {
+            x: parseInt(emptySlot.dataset.x as string),
+            y: parseInt(emptySlot.dataset.y as string)
+        }
+        const expanded: Array<SlotCoords> = this.expandEmpty(coords)
+        const randIndex = this.randomInt(0, expanded.length - 1)
+        const randSlot = this.board.querySelector(
+            `span.slot[data-x="${expanded[randIndex].x}"][data-y="${expanded[randIndex].y}"]`
+        ) as HTMLElement
+
+        // Skip valid movement because of 'expandEmpty' return 
+        this.swapEmptyWith(randSlot, false)
+
+        await this.delay()  // Prevent UI to lock
+    }
+
     private async mixBoard(): Promise<void> {
         this.toggleInputs() // Disable
         this.updateAlert({
@@ -88,8 +133,9 @@ export default class htmlManager {
             message: "Mixing..."
         } as Alert)
 
-        // Mock behaivor
-        await this.delay(1000)
+        for (let i = 0; i < this.mixMoves; i++)
+            await this.randomMix()
+
         this.toggleInputs() // Enabled
         this.updateAlert({
             status: AlertStatus.IDLE,
@@ -105,15 +151,24 @@ export default class htmlManager {
     private isValidSwap(empty: Slot, slot: Slot): boolean {
         if (empty.value === slot.value) return false
 
-        // Expand empty slot coordinates to find coincidence
-        if (empty.x === slot.x && (empty.y - 1 === slot.y || empty.y + 1 === slot.y) ||
-            empty.y === slot.y && (empty.x - 1 === slot.x || empty.x + 1 === slot.x))
-            return true
+        const slotCoords: SlotCoords = {
+            x: slot.x,
+            y: slot.y
+        } as SlotCoords
+
+        const neigbhors: Array<SlotCoords> = this.expandEmpty({
+            x: empty.x,
+            y: empty.y
+        } as SlotCoords)
+
+        for (const slot of neigbhors)
+            if (slot.x === slotCoords.x && slot.y === slotCoords.y)
+                return true
 
         return false;
     }
 
-    private swapEmptyWith(slot: HTMLElement): void {
+    private swapEmptyWith(slot: HTMLElement, verify: boolean = true): void {
         const empty = this.board.querySelector(
             `span.slot[data-status="${SlotStatus.EMPTY}"]`
         ) as HTMLElement
@@ -131,15 +186,15 @@ export default class htmlManager {
             value: slot.innerHTML,
             status: slot.dataset.status as SlotStatus
         }
-
-        if (!this.isValidSwap(emptySlot, slotPos)) {
-            const illegalMove: Alert = {
-                status: AlertStatus.WARNING,
-                message: `Can't move ${slotPos.value}`
+        if (verify)
+            if (!this.isValidSwap(emptySlot, slotPos)) {
+                const illegalMove: Alert = {
+                    status: AlertStatus.WARNING,
+                    message: `Can't move ${slotPos.value}`
+                }
+                this.updateAlert(illegalMove)
+                return
             }
-            this.updateAlert(illegalMove)
-            return
-        }
 
         empty.innerHTML = slotPos.value
         empty.dataset.status = slotPos.status
