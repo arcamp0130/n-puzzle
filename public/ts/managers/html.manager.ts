@@ -5,7 +5,7 @@ export default class htmlManager {
     public static stepDelay: number = 200
 
     private boardSize: number = 4
-    private mixMoves: number = 100
+    private mixMoves: number
     private defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
@@ -17,15 +17,18 @@ export default class htmlManager {
     private readonly board: HTMLElement
     private readonly cover: HTMLElement
     private readonly buttons: { [key: string]: HTMLButtonElement }
+    private readonly movesInput: HTMLInputElement
 
     // Private constructor to prevent direct instantiation
     private constructor() {
         this.board = document.querySelector("#board") as HTMLElement
+        this.movesInput = document.querySelector("#mix-moves") as HTMLInputElement
         this.buttons = {
             "solve": document.querySelector("button#solve") as HTMLButtonElement,
             "reset": document.querySelector("button#reset") as HTMLButtonElement,
             "random": document.querySelector("button#random") as HTMLButtonElement,
         }
+        this.mixMoves = parseInt(this.movesInput.value) || 100
         this.alert = {
             container: document.querySelector(".alert") as HTMLElement,
             message: document.querySelector("#message") as HTMLElement
