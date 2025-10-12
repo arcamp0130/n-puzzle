@@ -1,4 +1,5 @@
 import { Board } from "../types/game.types"
+import { Problem } from "../classes/classes.index"
 
 export default class GameManager {
     private static instance: GameManager

@@ -1,4 +1,5 @@
 import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
+import { Problem } from "../classes/classes.index"
 
 export default class HTMLManager {
     private static instance: HTMLManager
@@ -41,7 +42,7 @@ export default class HTMLManager {
      * several element in screen, such as inputs and board cover, among other
      * functions.
     */
-    
+
     public static get Instance(): HTMLManager {
         if (!HTMLManager.instance) {
             HTMLManager.instance = new HTMLManager()
@@ -143,7 +144,7 @@ export default class HTMLManager {
      * and avoid rewritting code. Larger helpers are used to handle board
      * auto-mix.
      */
-    
+
     private async delay(ms: number | null = null): Promise<void> {
         return new Promise(_ => setTimeout(_, ms || HTMLManager.stepDelay));
     }
