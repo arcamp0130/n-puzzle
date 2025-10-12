@@ -1,5 +1,7 @@
 import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
 import { Problem } from "../classes/classes.index"
+import { GameResponse } from "../types/game.types"
+import { GameManager } from "./managers.index"
 
 export default class HTMLManager {
     private static instance: HTMLManager
@@ -145,7 +147,7 @@ export default class HTMLManager {
      * auto-mix.
      */
 
-    private async delay(ms: number | null = null): Promise<void> {
+    public static async delay(ms: number | null = null): Promise<void> {
         return new Promise(_ => setTimeout(_, ms || HTMLManager.stepDelay));
     }
 
@@ -253,7 +255,7 @@ export default class HTMLManager {
         // Skip valid movement because of 'expandEmpty' return 
         this.swapEmptyWith(randSlot, false)
 
-        await this.delay()  // Prevent UI to lock
+        await HTMLManager.delay()  // Prevent UI to lock
     }
 
     /** ACTIONS
@@ -263,6 +265,7 @@ export default class HTMLManager {
      */
 
     private async solveGame(): Promise<void> {
+        const GameMgr = GameManager.Instance
         this.toggleInputs() // Disabled
         this.updateAlert({
             status: AlertStatus.IDLE,
@@ -270,14 +273,13 @@ export default class HTMLManager {
         } as Alert)
 
         // Mock behaivor
-        await this.delay(1000)
+        const res: GameResponse = await GameMgr.solve()
 
         this.toggleInputs() // Enabled
 
-        // Mock behaivor
         this.updateAlert({
-            status: AlertStatus.SUCCESS,
-            message: "Solved!"
+            status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
+            message: res.message
         } as Alert)
     }
 
