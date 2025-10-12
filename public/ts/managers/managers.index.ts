@@ -1,3 +1,7 @@
-import htmlManager from "./html.manager";
+import HTMLManager from "./html.manager";
+import GameManager from "./game.manager"
 
-export { htmlManager } 
+export {
+    HTMLManager,
+    GameManager
+}
