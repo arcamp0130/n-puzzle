@@ -35,8 +35,13 @@ export default class htmlManager {
             this.init()
     }
 
-
-    // Core methods
+    /** CORE METHODS
+     * The following core functions are essential to properly intantiate this class
+     * following a singleton design pattern, generate game board on screen, toggle
+     * several element in screen, such as inputs and board cover, among other
+     * functions.
+    */
+    
     public static get Instance(): htmlManager {
         if (!htmlManager.instance) {
             htmlManager.instance = new htmlManager()
@@ -81,8 +86,14 @@ export default class htmlManager {
     }
 
 
-    // Listeners
-    private addSlotsListeners() {
+    /** ADD LISTENERS
+     * As part of game initialization, is required to append listeners to
+     * several elements in DOM, these being game slots and buttons.
+     * These are only two methods, and addSlotListeners is the only one that
+     * is called more than once.
+     */
+
+    private addSlotsListeners(): void {
         const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
         slots.forEach(slot => {
             slot.addEventListener("click", () =>
@@ -91,7 +102,7 @@ export default class htmlManager {
         })
     }
 
-    private addButtonsListeners() {
+    private addButtonsListeners(): void {
         this.buttons["solve"].addEventListener("click", async () =>
             await this.solveGame()
         )
@@ -104,13 +115,18 @@ export default class htmlManager {
     }
 
 
-    // Toggle
+    /** TOGGLE 
+     * These methods are used to disable and enable, when required, buttons,
+     * text fields (mix movements) and board cover, so user can't modify any game
+     * parameter when any algorithm is in execution.
+     */
+
     private toggleCover(): void {
         this.cover.style.display
             = this.cover.style.display === "flex" ? "none" : "flex"
     }
 
-    private toggleInputs() {
+    private toggleInputs(): void {
         this.movesInput.disabled = !this.movesInput.disabled
         for (const button in this.buttons) {
             this.buttons[button].disabled = !this.buttons[button].disabled
@@ -119,7 +135,15 @@ export default class htmlManager {
     }
 
 
-    // Helpers
+    /** HELPERS
+     * Lots of main methods are included here, some with an easy and short
+     * logic, others quite complex.
+     * 
+     * These helpers are important to allow several methods to work properly
+     * and avoid rewritting code. Larger helpers are used to handle board
+     * auto-mix.
+     */
+    
     private async delay(ms: number | null = null): Promise<void> {
         return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
     }
@@ -128,7 +152,7 @@ export default class htmlManager {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    private updateAlert(newAlert: Alert) {
+    private updateAlert(newAlert: Alert): void {
         this.alert.container.dataset.status = newAlert.status
         this.alert.message.innerHTML = newAlert.message
     }
@@ -231,7 +255,12 @@ export default class htmlManager {
         await this.delay()  // Prevent UI to lock
     }
 
-    // Actions
+    /** ACTIONS
+     * These methods are called when solve, restart and mix buttons are
+     * pressed. May be called more than once, but they only have a single
+     * reference within this file.
+     */
+
     private async solveGame(): Promise<void> {
         this.toggleInputs() // Disabled
         this.updateAlert({
