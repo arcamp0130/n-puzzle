@@ -1,7 +1,7 @@
 import { Board } from "../types/game.types"
 
-export default class gameManager {
-    private static instance: gameManager
+export default class GameManager {
+    private static instance: GameManager
     private board: Board = []
     private boardSize: number = 4
 
@@ -10,10 +10,10 @@ export default class gameManager {
 
     }
 
-    public static get Instance(): gameManager {
-        if (!gameManager.instance) {
-            gameManager.instance = new gameManager()
+    public static get Instance(): GameManager {
+        if (!GameManager.instance) {
+            GameManager.instance = new GameManager()
         }
-        return gameManager.instance
+        return GameManager.instance
     }
 }

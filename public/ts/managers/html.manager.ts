@@ -1,7 +1,7 @@
 import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
 
-export default class htmlManager {
-    private static instance: htmlManager
+export default class HTMLManager {
+    private static instance: HTMLManager
     public static stepDelay: number = 200
 
     private boardSize: number = 4
@@ -42,11 +42,11 @@ export default class htmlManager {
      * functions.
     */
     
-    public static get Instance(): htmlManager {
-        if (!htmlManager.instance) {
-            htmlManager.instance = new htmlManager()
+    public static get Instance(): HTMLManager {
+        if (!HTMLManager.instance) {
+            HTMLManager.instance = new HTMLManager()
         }
-        return htmlManager.instance
+        return HTMLManager.instance
     }
 
     private init(): void {
@@ -145,7 +145,7 @@ export default class htmlManager {
      */
     
     private async delay(ms: number | null = null): Promise<void> {
-        return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
+        return new Promise(_ => setTimeout(_, ms || HTMLManager.stepDelay));
     }
 
     private randomInt(min: number, max: number): number {
