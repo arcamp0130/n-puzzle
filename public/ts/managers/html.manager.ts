@@ -50,22 +50,29 @@ export default class htmlManager {
         return new Promise(_ => setTimeout(_, ms || htmlManager.stepDelay));
     }
 
-    private toggleCover(message: string | null = null): void {
+    private toggleCover(): void {
         this.cover.style.display
         = this.cover.style.display === "flex" ? "none" : "flex"
     }
 
+    private toggleInputs() {
+        for (const button in this.buttons) {
+            this.buttons[button].disabled = !this.buttons[button].disabled
+        }
+        this.toggleCover();
+    }
+
     private async solveGame(): Promise<void> {
-        this.toggleCover() // Covered
+        this.toggleInputs() // Disabled
         this.updateAlert({
             status: AlertStatus.IDLE,
             message: "Solving..."
         } as Alert)
 
         // Mock behaivor
-        await this.delay()
+        await this.delay(1000)
 
-        this.toggleCover() // Exposed
+        this.toggleInputs() // Enabled
 
         // Mock behaivor
         this.updateAlert({
@@ -75,15 +82,15 @@ export default class htmlManager {
     }
 
     private async mixBoard(): Promise<void> {
-        this.toggleCover() // Covered
+        this.toggleInputs() // Disable
         this.updateAlert({
             status: AlertStatus.IDLE,
             message: "Mixing..."
         } as Alert)
 
         // Mock behaivor
-        await this.delay()
-        this.toggleCover() // Exposed
+        await this.delay(1000)
+        this.toggleInputs() // Enabled
         this.updateAlert({
             status: AlertStatus.IDLE,
             message: "Mixed!"
