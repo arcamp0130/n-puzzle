@@ -4,8 +4,9 @@ import { HTMLManager } from "../managers/managers.index"
 
 export default class GameManager {
     private static instance: GameManager
-    // private board: Board = []
-    // private boardSize: number = 4
+
+    // Store goal positions for O(1) lookup
+    private static goalPositions: Map<number, SlotCoords> = new Map()
 
     public static defaultGoal: Board =
        [[1, 2, 3, 4],
@@ -25,15 +26,31 @@ export default class GameManager {
         return GameManager.instance
     }
 
-    private manhattan(coords_1: SlotCoords, coords_2: SlotCoords) {
-        // |x_1 - x_2| + |y_1 - y_2| = d
+    // Initialize goal positions --> O(n^2)
+    private initGoalPositions(goal: Board, size: number): void {
+        if (GameManager.goalPositions.size === 0)
+            for (let i = 0; i < size; i++)
+                for (let j = 0; j < size; j++) {
+                    const value = goal[i][j]
+                    if (value !== 0)  // Don't store empty tile
+                        GameManager.goalPositions.set(value, { y: i, x: j })
+
+                }
+    }
+
+    private clearGoalPositions(): void {
+        GameManager.goalPositions.clear()
+    }
+
+    private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
+        return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
     private heuristic(state: Board, goal: Board = GameManager.defaultGoal) {
         // Use Manhattan repeatedly for each coordinate 
     }
 
-    private async aStar (problem: Problem): Promise<GameResponse> {
+    private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>()
         const closeList: Set<Board> = new Set<Board>()
 
@@ -61,6 +78,7 @@ export default class GameManager {
 
     public async solve(problem: Problem): Promise<GameResponse> {
         await HTMLManager.delay(2000)
+        this.initGoalPositions(problem.goal, problem.boardSize)
         try {
             return await this.aStar(problem)
         } catch (error) {
@@ -68,6 +86,8 @@ export default class GameManager {
                 success: false,
                 message: "Something went wrong while solving."
             } as GameResponse
+        } finally {
+            this.clearGoalPositions()
         }
 
     }
