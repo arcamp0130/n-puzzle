@@ -1,4 +1,4 @@
-import { Board, GameResponse, SlotCoords } from "../types/game.types"
+import { Board, GameResponse, SlotCoords, MoveWith } from "../types/game.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 
@@ -42,6 +42,22 @@ export default class GameManager {
         GameManager.goalPositions.clear()
     }
 
+    private expandMoves(size: number, emptyPos: SlotCoords): Array<MoveWith> {
+        const expanded: Array<MoveWith> = []
+
+        return expanded
+    }
+
+    private getEmptyPos(board: Board): SlotCoords | undefined {
+        for (let i = 0; i < board.length; i++)
+            for (let j = 0; j < board[i].length; j++)
+                if (board[i][j] === 0)
+                    return { x: j, y: i }
+
+        return undefined
+    }
+
+
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
@@ -50,7 +66,7 @@ export default class GameManager {
         let h: number = 0
 
         // For each value in state board (except 0 which is empty)
-        for (let i = 0; i < size; i++) 
+        for (let i = 0; i < size; i++)
             for (let j = 0; j < size; j++) {
                 const value = state[i][j]
                 if (value === 0) continue; // Skip empty slot
@@ -61,7 +77,7 @@ export default class GameManager {
                 // Add Manhattan distance between current and goal positions
                 h += this.manhattan({ x: j, y: i }, goalPos)
             }
-            
+
         return h
     }
 
@@ -75,12 +91,18 @@ export default class GameManager {
         while (openList.size() > 0) {
             // Ensure exiting when openList empty
             if (openList.peek() === undefined) break
-            const state: Board = openList.dequeue() as Board
+            const state: Board = openList.dequeue()!
 
             if (problem.isGoal(state)) return {
                 success: true,
-                message: "Problem was same as goal... This' not a puzzle!"
+                message: "Problem solved!"
             } as GameResponse
+
+            const emptyPos: SlotCoords | undefined = this.getEmptyPos(state)
+            
+            // Unable to find solution if no empty position available
+            if (emptyPos === undefined) break
+            const newStates: Array<MoveWith> = this.expandMoves(problem.boardSize, emptyPos)
         }
 
         // Mock
