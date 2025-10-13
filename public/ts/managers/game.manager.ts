@@ -4,8 +4,8 @@ import { HTMLManager } from "../managers/managers.index"
 
 export default class GameManager {
     private static instance: GameManager
-    private board: Board = []
-    private boardSize: number = 4
+    // private board: Board = []
+    // private boardSize: number = 4
 
     public static defaultGoal: Board =
        [[1, 2, 3, 4],
@@ -31,6 +31,16 @@ export default class GameManager {
 
     private heuristic(state: Board, goal: Board = GameManager.defaultGoal) {
         // Use Manhattan repeatedly for each coordinate 
+    }
+
+    private async aStar (problem: Problem): Promise<GameResponse> {
+        const openList: PQueue<Board> = new PQueue<Board>()
+        const closeList: Set<Board> = new Set<Board>()
+
+        return {
+            success: false,
+            message: "No solution found"
+        } as GameResponse
     }
 
     public async solve(problem: Problem): Promise<GameResponse> {
