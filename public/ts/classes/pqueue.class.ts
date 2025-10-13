@@ -27,12 +27,27 @@ export default class PQueue<T> {
     }
 
     // True if found and replaced
-    public updatePriotity(
+    public updatePriority(
         element: T,
-        cost: number,
+        newCost: number,
         compare: (a: T, b: T) => boolean
     ): boolean {
-        return true // Placeholder
+        const index = this.items.findIndex(
+            (item: PQueueItem<T>) => compare(item.element, element)
+        )
+
+        // If no coincidence found, exit with false
+        if (index === -1) return false
+
+        // First, remove element in array
+        this.items.splice(index, 1)
+
+        // Now, queue again removed element
+        this.enqueue(element, newCost)
+
+        // Exit with true if element replaced
+        return true
+
     }
 
     public size(): number {
