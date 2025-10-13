@@ -12,7 +12,19 @@ export default class Problem {
         this.goal = goal || GameManager.defaultGoal
     }
 
-    public isGoal(state: Board) {
-        return state === this.goal
+    public static compareStates = function (
+        first: Board,
+        second: Board = GameManager.defaultGoal
+    ) : boolean {
+
+        // Serialize both states to compare
+        const jsonFirst = JSON.stringify(first)
+        const jsonSecond = JSON.stringify(second)
+
+        return jsonFirst === jsonSecond
+    }
+
+    public isGoal(state: Board): boolean {
+        return Problem.compareStates(state, this.goal)
     }
 }
