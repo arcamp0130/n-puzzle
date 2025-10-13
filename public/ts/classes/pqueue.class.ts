@@ -7,7 +7,33 @@ export default class PQueue<T> {
 
     // Binary search to arrange array. Lower-cost element at pos 0
     public enqueue(element: T, cost: number): void {
+        // Build new item
+        const newItem: PQueueItem<T> = { element, cost }
 
+        // Indexes of both ends of array
+        let low: number = 0
+        let high: number = this.size() - 1
+
+        // Find point to insert new element
+        while (low < high) {
+            const mid: number = Math.floor(
+                (high - low) / 2 // Distance between both points, divided
+            ) + low // Fix 'low' substraction to get actual index
+            
+            // If a same-cost element was found, stop searching
+            if (this.items[mid].cost === cost) {
+                low = mid
+                break // while
+            }
+
+            if (this.items[mid].cost > cost) 
+                high = mid - 1
+            else 
+                low = mid + 1
+        }
+
+        // Insert new element at the found index
+        this.items.splice(low, 0, newItem)
     }
 
     // Extract first item's element in array
