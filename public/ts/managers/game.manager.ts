@@ -1,5 +1,5 @@
-import { Board, GameResponse, Movements } from "../types/game.types"
-import { SlotCoords } from "../types/html.types"
+import { Board, BoardState, GameResponse } from "../types/game.types"
+import { Slot, SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 
@@ -43,8 +43,20 @@ export default class GameManager {
         GameManager.goalPositions.clear()
     }
 
-    private expandMoves(size: number, emptyPos: SlotCoords): Array<MoveWith> {
-        const expanded: Array<MoveWith> = []
+    private expandMoves(size: number, emptyPos: SlotCoords): Array<SlotCoords> {
+        const expanded: Array<SlotCoords> = []
+        const calculated: Array<SlotCoords> = [
+            { x: emptyPos.x + 1, y: emptyPos.y },
+            { x: emptyPos.x - 1, y: emptyPos.y },
+            { x: emptyPos.x, y: emptyPos.y + 1 },
+            { x: emptyPos.x, y: emptyPos.y - 1 }
+        ]
+
+        for (const position of calculated) {
+            if (position.x < 0 || position.x >= size || position.y < 0 || position.y >= size)
+                continue
+            expanded.push(position)
+        }
 
         return expanded
     }
@@ -84,26 +96,32 @@ export default class GameManager {
 
     private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>()
-        const closeList: Set<Board> = new Set<Board>()
+        const closeList: Set<BoardState> = new Set<BoardState>()
 
         openList.enqueue(problem.board, 0)
+        closeList.add({ element: problem.board })
 
         // While openList is not empty
         while (openList.size() > 0) {
             // Ensure exiting when openList empty
             if (openList.peek() === undefined) break
-            const state: Board = openList.dequeue()!
+            const current: Board = openList.dequeue()!
 
-            if (problem.isGoal(state)) return {
+            if (problem.isGoal(current)) return {
                 success: true,
                 message: "Problem solved!"
             } as GameResponse
 
-            const emptyPos: SlotCoords | undefined = this.getEmptyPos(state)
-            
+            const emptyPos: SlotCoords | undefined = this.getEmptyPos(current)
+
             // Unable to find solution if no empty position available
             if (emptyPos === undefined) break
-            const newStates: Array<MoveWith> = this.expandMoves(problem.boardSize, emptyPos)
+
+            const newMoves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
+            for (const move of newMoves) {
+                console.log(move)
+            }
+            
         }
 
         // Mock
