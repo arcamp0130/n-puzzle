@@ -1,4 +1,4 @@
-import { Board, GameResponse } from "../types/game.types"
+import { Board, GameResponse, SlotCoords } from "../types/game.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 
@@ -23,6 +23,14 @@ export default class GameManager {
             GameManager.instance = new GameManager()
         }
         return GameManager.instance
+    }
+
+    private manhattan(coords_1: SlotCoords, coords_2: SlotCoords) {
+        // |x_1 - x_2| + |y_1 - y_2| = d
+    }
+
+    private heuristic(state: Board, goal: Board = GameManager.defaultGoal) {
+        // Use Manhattan repeatedly for each coordinate 
     }
 
     public async solve(problem: Problem): Promise<GameResponse> {

@@ -1,3 +1,5 @@
+import { SlotCoords } from "./html.types"
+
 export type Board = number[][]
 
 export interface PQueueItem<T> {
@@ -9,3 +11,5 @@ export interface GameResponse {
     message: string
     success: boolean
 }
+
+export { SlotCoords }
