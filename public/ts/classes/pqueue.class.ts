@@ -5,24 +5,34 @@ export default class PQueue<T> {
 
     constructor() { }
 
+    // Binary search to arrange array. Lower-cost element at pos 0
     public enqueue(element: T, cost: number): void {
 
     }
 
-    public dequeue(): void {
-
+    // Extract first item's element in array
+    public dequeue(): T | undefined {
+        return this.items.shift()?.element
     }
 
-    public peek(): void {
-
+    public peek(): T | undefined {
+        return this.items[0]?.element
     }
 
-    public contains(): void {
-
+    public contains(
+        element: T,
+        compare: (a: T, b: T) => boolean
+    ): boolean {
+        return true // Placeholder
     }
 
-    public updatePriotity(): void {
-        
+    // True if found and replaced
+    public updatePriotity(
+        element: T,
+        cost: number,
+        compare: (a: T, b: T) => boolean
+    ): boolean {
+        return true // Placeholder
     }
 
     public size(): number {
