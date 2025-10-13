@@ -9,7 +9,7 @@ export default class GameManager {
     private static goalPositions: Map<number, SlotCoords> = new Map()
 
     public static defaultGoal: Board =
-       [[1, 2, 3, 4],
+        [[1, 2, 3, 4],
         [5, 6, 7, 8],
         [9, 10, 11, 12],
         [13, 14, 15, 0]]
@@ -46,8 +46,23 @@ export default class GameManager {
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
-    private heuristic(state: Board, goal: Board = GameManager.defaultGoal) {
-        // Use Manhattan repeatedly for each coordinate 
+    private heuristic(state: Board, size: number): number {
+        let h: number = 0
+
+        // For each value in state board (except 0 which is empty)
+        for (let i = 0; i < size; i++) 
+            for (let j = 0; j < size; j++) {
+                const value = state[i][j]
+                if (value === 0) continue; // Skip empty slot
+
+                // look for position of value in goal
+                const goalPos = GameManager.goalPositions.get(value)!
+
+                // Add Manhattan distance between current and goal positions
+                h += this.manhattan({ x: j, y: i }, goalPos)
+            }
+            
+        return h
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
@@ -59,14 +74,13 @@ export default class GameManager {
         // While openList is not empty
         while (openList.size() > 0) {
             // Ensure exiting when openList empty
-            if (openList.peek() === undefined) break 
+            if (openList.peek() === undefined) break
             const state: Board = openList.dequeue() as Board
 
             if (problem.isGoal(state)) return {
                 success: true,
                 message: "Problem was same as goal... This' not a puzzle!"
             } as GameResponse
-            
         }
 
         // Mock
