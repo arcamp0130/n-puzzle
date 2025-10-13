@@ -37,21 +37,38 @@ export default class GameManager {
         const openList: PQueue<Board> = new PQueue<Board>()
         const closeList: Set<Board> = new Set<Board>()
 
+        openList.enqueue(problem.board, 0)
+
+        // While openList is not empty
+        while (openList.size() > 0) {
+            // Ensure exiting when openList empty
+            if (openList.peek() === undefined) break 
+            const state: Board = openList.dequeue() as Board
+
+            if (problem.isGoal(state)) return {
+                success: true,
+                message: "Problem was same as goal... This' not a puzzle!"
+            } as GameResponse
+            
+        }
+
+        // Mock
         return {
             success: false,
-            message: "No solution found"
+            message: "[Mock] No solution found"
         } as GameResponse
     }
 
     public async solve(problem: Problem): Promise<GameResponse> {
-        const pQueue = new PQueue<Board>()
-
-        // Mock behaivor
         await HTMLManager.delay(2000)
-        return {
-            message: "[Mock] Solved!",
-            success: true
-        } as GameResponse
+        try {
+            return await this.aStar(problem)
+        } catch (error) {
+            return {
+                success: false,
+                message: "Something went wrong while solving."
+            } as GameResponse
+        }
 
     }
 }
