@@ -20,10 +20,12 @@ export default class PQueue<T> {
     }
 
     public contains(
-        element: T,
+        target: T,
         compare: (a: T, b: T) => boolean
     ): boolean {
-        return true // Placeholder
+        return this.items.some(
+            (item: PQueueItem<T>) => compare(item.element, target)
+        )
     }
 
     // True if found and replaced
@@ -47,7 +49,6 @@ export default class PQueue<T> {
 
         // Exit with true if element replaced
         return true
-
     }
 
     public size(): number {
