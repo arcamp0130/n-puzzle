@@ -1,4 +1,5 @@
-import { Board, GameResponse, SlotCoords, MoveWith } from "../types/game.types"
+import { Board, GameResponse, Movements } from "../types/game.types"
+import { SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 

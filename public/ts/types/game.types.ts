@@ -1,6 +1,4 @@
-import { SlotCoords } from "./html.types"
-
-export enum MoveWith {
+export enum Movements {
     UP = 'up',
     DOWN = 'down',
     LEFT = 'left',
@@ -19,5 +17,3 @@ export interface GameResponse {
     message: string
     success: boolean
 }
-
-export { SlotCoords }
