@@ -76,7 +76,7 @@ export default class GameManager {
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
         // Create a deep copy of the board
         const newBoard: Board = board.map(row => [...row]);
-        
+
         // Perform swap on the copy
         const slotVal: number = newBoard[slot.y][slot.x]
         const emptyVal: number = newBoard[empty.y][empty.x]
@@ -113,9 +113,12 @@ export default class GameManager {
     private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>();
         const closedSet: Set<string> = new Set(); // Using serialized boards for comparison
-        
+        let gScore: Map<string, number> = new Map();
+
         // Initialize starting node
         const startBoard = problem.board;
+        const startKey = JSON.stringify(startBoard);
+        gScore.set(startKey, 0);
         openList.enqueue(startBoard, this.heuristic(startBoard, problem.boardSize));
 
         while (openList.size() > 0) {
@@ -136,22 +139,39 @@ export default class GameManager {
             // If wasn't solution
             closedSet.add(currentKey)
 
-            // Empty slot positon
+            // Get empty slot positon
             const emptyPos: SlotCoords | undefined = this.getEmptyPos(current.element)
 
             // Unable to find solution if no empty position available
             if (!emptyPos) continue
 
+            // Expand next available moves
             const moves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
 
             for (const move of moves) {
                 const nextBoard: Board = this.swap(emptyPos, move, current.element)
                 const nextKey: string = JSON.stringify(nextBoard)
 
-                const newCost = 1 + this.heuristic(nextBoard, problem.boardSize)
-            }
-            
+                if (problem.isGoal(nextBoard)) return {
+                    success: true,
+                    message: "Problem solved!"
+                }
 
+                if (closedSet.has(nextKey)) continue
+
+                const gTentative = gScore.get(currentKey)! + 1
+
+                // If a better score was found
+                if (!gScore.has(nextKey) || gTentative < gScore.get(nextKey)!) {
+                    gScore.set(nextKey, gTentative)
+                    const fScore = gTentative + this.heuristic(nextBoard, problem.boardSize)
+
+                    if (!gScore.has(nextKey))
+                        openList.enqueue(nextBoard, fScore, current.element)
+                    else
+                        openList.updatePriority(nextBoard, fScore, currentBoard, Problem.compareBoards)
+                }
+            }
         }
 
         return {
