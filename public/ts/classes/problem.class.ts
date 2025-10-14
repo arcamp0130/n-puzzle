@@ -12,23 +12,16 @@ export default class Problem {
         this.goal = goal || GameManager.defaultGoal
     }
 
+    public static serializeBoard(board: Board): string {
+        return board.map(row => row.join(',')).join('|');
+    }
+
     public static compareBoards = function (
         first: Board,
         second: Board
     ): boolean {
         if (!first || !second) return false;
-        
-        // Compare dimensions first
-        if (first.length !== second.length) return false;
-        
-        // Compare each row
-        for (let i = 0; i < first.length; i++) {
-            if (first[i].length !== second[i].length) return false;
-            for (let j = 0; j < first[i].length; j++) {
-                if (first[i][j] !== second[i][j]) return false;
-            }
-        }
-        return true;
+        return Problem.serializeBoard(first) === Problem.serializeBoard(second);
     }
 
     public isGoal(state: Board): boolean {
