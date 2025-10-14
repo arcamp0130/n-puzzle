@@ -6,9 +6,9 @@ export default class PQueue<T> {
     constructor() { }
 
     // Binary search to arrange array. Lower-cost element at pos 0
-    public enqueue(element: T, cost: number): void {
+    public enqueue(element: T, cost: number, parent?: T): void {
         // Build new item
-        const newItem: PQueueItem<T> = { element, cost }
+        const newItem: PQueueItem<T> = { element, cost, parent }
 
         // Indexes of both ends of array
         let low: number = 0
@@ -37,8 +37,8 @@ export default class PQueue<T> {
     }
 
     // Extract first item's element in array
-    public dequeue(): T | undefined {
-        return this.items.shift()?.element
+    public dequeue(): PQueueItem<T> | undefined {
+        return this.items.shift()
     }
 
     public remove(

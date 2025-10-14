@@ -1,4 +1,4 @@
-import { Board, BoardState, GameResponse } from "../types/game.types"
+import { Board, BoardState, GameResponse, PQueueItem } from "../types/game.types"
 import { SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
@@ -117,29 +117,22 @@ export default class GameManager {
         while (openList.size() > 0) {
             // Ensure exiting when openList empty
             if (openList.peek() === undefined) break
-            const current: Board = openList.dequeue()!
+            const current: PQueueItem<Board> = openList.dequeue()!
 
-            if (problem.isGoal(current)) return {
+            if (problem.isGoal(current.element)) return {
                 success: true,
                 message: "Problem solved!"
             } as GameResponse
 
             iterator++
-            const emptyPos: SlotCoords | undefined = this.getEmptyPos(current)
+            const emptyPos: SlotCoords | undefined = this.getEmptyPos(current.element)
 
             // Unable to find solution if no empty position available
             if (emptyPos === undefined) break
 
             const newMoves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
             for (const move of newMoves) {
-                const descendant: Board = this.swap(emptyPos, move, current)
-                // const descendantState: BoardState = {
-                //     element: descendant,    // New state has been created
-                //     parent: current         // Appending current board as parent
-                // }
-                // console.log(move)
-                // console.log(this.heuristic(descendant, problem.boardSize))
-
+                const descendant: Board = this.swap(emptyPos, move, current.element)
                 const newCost = iterator + this.heuristic(descendant, problem.boardSize)
 
                 // If alredy visited
@@ -166,18 +159,20 @@ export default class GameManager {
                         openList.updatePriority(
                             descendant,             // new state
                             newCost,                // new cost
-                            current,                // parent
+                            current.element,        // parent
                             Problem.compareBoards   // compare function
                         )
                         continue // next move
                     }
                 }
 
-                // If not in open list yet, add it
-                // TODO: refactor skip and add new element in openList
-                if (openList.contains(descendant, Problem.compareBoards)) continue
-                /* Calculate cost and add new element to openList*/
+                // If not visited or discovered yet, add to open list and mark discovered
+                openList.enqueue(descendant, newCost)
+                discovered.add(descendant)
             }
+            // add current to closeList and mark as visited
+            closeList.enqueue(current.element, current.cost, current.parent)
+            visited.add(current.element)
 
         }
 

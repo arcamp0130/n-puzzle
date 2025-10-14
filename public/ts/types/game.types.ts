@@ -3,7 +3,7 @@ export type Board = number[][]
 export interface PQueueItem<T> {
     element: T
     cost: number
-    parent?: PQueueItem<T>
+    parent?: T
 }
 
 export interface BoardState {
