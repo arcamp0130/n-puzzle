@@ -106,6 +106,7 @@ export default class GameManager {
     private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>()
         const closeList: Set<BoardState> = new Set<BoardState>()
+        let iterator: number = 0
 
         openList.enqueue(problem.board, 0)
         closeList.add({ element: problem.board })
@@ -121,6 +122,7 @@ export default class GameManager {
                 message: "Problem solved!"
             } as GameResponse
 
+            iterator++
             const emptyPos: SlotCoords | undefined = this.getEmptyPos(current)
 
             // Unable to find solution if no empty position available
@@ -133,6 +135,9 @@ export default class GameManager {
                     element: descendant,    // New state has been created
                     parent: current         // Appending current board as parent
                 }
+                console.log(move)
+                console.log(this.heuristic(descendant, problem.boardSize))
+                const newCost = iterator + this.heuristic(descendant, problem.boardSize)
 
                 // If alredy visited
                 if (closeList.has(descendantState)) continue
