@@ -19,16 +19,16 @@ export default class PQueue<T> {
             const mid: number = Math.floor(
                 (high - low) / 2 // Distance between both points, divided
             ) + low // Fix 'low' substraction to get actual index
-            
+
             // If a same-cost element was found, stop searching
             if (this.items[mid].cost === cost) {
                 low = mid
                 break // while
             }
 
-            if (this.items[mid].cost > cost) 
+            if (this.items[mid].cost > cost)
                 high = mid - 1
-            else 
+            else
                 low = mid + 1
         }
 
@@ -41,8 +41,37 @@ export default class PQueue<T> {
         return this.items.shift()?.element
     }
 
+    public remove(
+        target: T,
+        compare: (a: T, b: T) => boolean
+    ): boolean {
+        const index = this.items.findIndex(
+            (item: PQueueItem<T>) => compare(item.element, target)
+        )
+
+        // If no coincidence found, exit with false
+        if (index === -1) return false
+
+        // Remove element in array
+        // Exit with true if correctly removed
+        this.items.splice(index, 1)
+        return true
+
+    }
+
     public peek(): T | undefined {
         return this.items[0]?.element
+    }
+
+    public costOf(element: T, compare: (a: T, b: T) => boolean): number | undefined {
+        let cost: number | undefined = undefined
+
+        this.items.forEach((item: PQueueItem<T>) => {
+            if (compare(item.element, element))
+                cost = item.cost
+        })
+
+        return cost
     }
 
     public contains(

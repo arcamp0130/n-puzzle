@@ -105,11 +105,12 @@ export default class GameManager {
 
     private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>()
-        const closeList: Set<BoardState> = new Set<BoardState>()
+        const closeList: PQueue<Board> = new PQueue<Board>()
+        const visited: Set<Board> = new Set<Board>() // Visited states, no parents
         let iterator: number = 0
 
         openList.enqueue(problem.board, 0)
-        closeList.add({ element: problem.board })
+        closeList.enqueue(problem.board, 0)
 
         // While openList is not empty
         while (openList.size() > 0) {
@@ -131,23 +132,35 @@ export default class GameManager {
             const newMoves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
             for (const move of newMoves) {
                 const descendant: Board = this.swap(emptyPos, move, current)
-                const descendantState: BoardState = {
-                    element: descendant,    // New state has been created
-                    parent: current         // Appending current board as parent
-                }
-                console.log(move)
-                console.log(this.heuristic(descendant, problem.boardSize))
+                // const descendantState: BoardState = {
+                //     element: descendant,    // New state has been created
+                //     parent: current         // Appending current board as parent
+                // }
+                // console.log(move)
+                // console.log(this.heuristic(descendant, problem.boardSize))
+
                 const newCost = iterator + this.heuristic(descendant, problem.boardSize)
 
                 // If alredy visited
-                if (closeList.has(descendantState)) continue
+                if (visited.has(descendant)) {
+                    const cost: number | undefined
+                        = closeList.costOf(descendant, Problem.compareBoards)
+
+                    // Return to open list if new state has a lower cost
+                    if (cost !== undefined || cost! > newCost) {
+                        openList.enqueue(descendant, newCost)
+                        closeList.remove(descendant, Problem.compareBoards)
+                        continue // next move
+                    }
+
+                }
 
                 // If not in open list yet, add it
                 // TODO: refactor skip and add new element in openList
                 if (openList.contains(descendant, Problem.compareBoards)) continue
-                    /* Calculate cost and add new element to openList*/
+                /* Calculate cost and add new element to openList*/
             }
-            
+
         }
 
         // Mock
