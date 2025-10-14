@@ -14,14 +14,21 @@ export default class Problem {
 
     public static compareBoards = function (
         first: Board,
-        second: Board = GameManager.defaultGoal
-    ) : boolean {
-
-        // Serialize both states to compare
-        const jsonFirst = JSON.stringify(first)
-        const jsonSecond = JSON.stringify(second)
-
-        return jsonFirst === jsonSecond
+        second: Board
+    ): boolean {
+        if (!first || !second) return false;
+        
+        // Compare dimensions first
+        if (first.length !== second.length) return false;
+        
+        // Compare each row
+        for (let i = 0; i < first.length; i++) {
+            if (first[i].length !== second[i].length) return false;
+            for (let j = 0; j < first[i].length; j++) {
+                if (first[i][j] !== second[i][j]) return false;
+            }
+        }
+        return true;
     }
 
     public isGoal(state: Board): boolean {
