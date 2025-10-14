@@ -110,6 +110,26 @@ export default class GameManager {
         return h
     }
 
+    private backtrack(
+        goalBoard: Board,
+        parentsList: Map<string, Board>,
+        startBoard: Board
+    ): Board[] {
+        const path: Board[] = [goalBoard];
+        let current = goalBoard;
+
+        while (Problem.serializeBoard(current) !== Problem.serializeBoard(startBoard)) {
+            const currentKey = Problem.serializeBoard(current);
+            const parent = parentsList.get(currentKey);
+            if (!parent) break; // Safety check
+
+            path.unshift(parent); // Add to beginning of array
+            current = parent;
+        }
+
+        return path;
+    }
+
     private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>();
         const closedSet: Set<string> = new Set(); // Using serialized boards for comparison
@@ -122,7 +142,6 @@ export default class GameManager {
         gScore.set(startKey, 0);
         openList.enqueue(startBoard, this.heuristic(startBoard, problem.boardSize));
 
-
         let iterations: number = 0
         const maxIterations: number = 10000
         console.log("Solving...")
@@ -131,15 +150,19 @@ export default class GameManager {
             iterations++
             const current: PQueueItem<Board> = openList.dequeue()!
             if (!current) break
-            
+
             const currentBoard = current.element
             const currentKey = Problem.serializeBoard(current.element)
             console.log("x Iterations")
 
-            if (problem.isGoal(currentBoard)) return {
-                success: true,
-                message: "Problem solved!"
-            } as GameResponse
+            if (problem.isGoal(currentBoard)) {
+                const solution = this.backtrack(currentBoard, parentsList, startBoard);
+                return {
+                    success: true,
+                    message: `Solution found in ${solution.length - 1} moves!`,
+                    solution: solution
+                };
+            }
 
 
             // If wasn't solution
@@ -158,9 +181,13 @@ export default class GameManager {
                 const nextBoard: Board = this.swap(emptyPos, move, currentBoard)
                 const nextKey: string = Problem.serializeBoard(nextBoard)
 
-                if (problem.isGoal(nextBoard)) return {
-                    success: true,
-                    message: "Problem solved!"
+                if (problem.isGoal(nextBoard)) {
+                    const solution = this.backtrack(nextBoard, parentsList, startBoard);
+                    return {
+                        success: true,
+                        message: "Problem solved!",
+                        solution: solution
+                    }
                 }
 
                 if (closedSet.has(nextKey)) continue
@@ -185,7 +212,8 @@ export default class GameManager {
 
         return {
             success: false,
-            message: iterations > maxIterations ? "Max iterations reached." : "No solution found."
+            message: iterations > maxIterations ? "Max iterations reached." : "No solution found.",
+            solution: []
         } as GameResponse
     }
 
