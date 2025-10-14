@@ -1,5 +1,5 @@
 import { Board, BoardState, GameResponse } from "../types/game.types"
-import { Slot, SlotCoords } from "../types/html.types"
+import { SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 
@@ -53,8 +53,9 @@ export default class GameManager {
         ]
 
         for (const position of calculated) {
-            if (position.x < 0 || position.x >= size || position.y < 0 || position.y >= size)
-                continue
+            // Pass if calculated not in valid range
+            if (position.x < 0 || position.x >= size ||
+                position.y < 0 || position.y >= size) continue
             expanded.push(position)
         }
 
@@ -70,6 +71,14 @@ export default class GameManager {
         return undefined
     }
 
+    private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
+        const slotVal: number = board[slot.y][slot.x]
+
+        board[empty.y][empty.x] = slotVal
+        board[slot.y][slot.x] = 0 // 0 is always empty slot
+
+        return board
+    }
 
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
@@ -119,7 +128,19 @@ export default class GameManager {
 
             const newMoves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
             for (const move of newMoves) {
-                console.log(move)
+                const descendant: Board = this.swap(emptyPos, move, current)
+                const descendantState: BoardState = {
+                    element: descendant,    // New state has been created
+                    parent: current         // Appending current board as parent
+                }
+
+                // If alredy visited
+                if (closeList.has(descendantState)) continue
+
+                // If not in open list yet, add it
+                // TODO: refactor skip and add new element in openList
+                if (openList.contains(descendant, Problem.compareStates)) continue
+                    /* Calculate cost and add new element to openList*/
             }
             
         }
