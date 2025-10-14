@@ -106,6 +106,7 @@ export default class GameManager {
     private async aStar(problem: Problem): Promise<GameResponse> {
         const openList: PQueue<Board> = new PQueue<Board>()
         const closeList: PQueue<Board> = new PQueue<Board>()
+        const discovered: Set<Board> = new Set<Board>()
         const visited: Set<Board> = new Set<Board>() // Visited states, no parents
         let iterator: number = 0
 
@@ -146,13 +147,30 @@ export default class GameManager {
                     const cost: number | undefined
                         = closeList.costOf(descendant, Problem.compareBoards)
 
-                    // Return to open list if new state has a lower cost
-                    if (cost !== undefined || cost! > newCost) {
+                    // Return to open list if new cost is lower
+                    if (cost !== undefined && cost > newCost) {
                         openList.enqueue(descendant, newCost)
                         closeList.remove(descendant, Problem.compareBoards)
                         continue // next move
                     }
 
+                }
+
+                // If alredy discovered
+                if (discovered.has(descendant)) {
+                    const cost: number | undefined
+                        = openList.costOf(descendant, Problem.compareBoards)
+
+                    // Update cost element in open list if new cost is lower
+                    if (cost !== undefined && cost > newCost) {
+                        openList.updatePriority(
+                            descendant,             // new state
+                            newCost,                // new cost
+                            current,                // parent
+                            Problem.compareBoards   // compare function
+                        )
+                        continue // next move
+                    }
                 }
 
                 // If not in open list yet, add it

@@ -87,6 +87,7 @@ export default class PQueue<T> {
     public updatePriority(
         element: T,
         newCost: number,
+        parent: T,
         compare: (a: T, b: T) => boolean
     ): boolean {
         const index = this.items.findIndex(
