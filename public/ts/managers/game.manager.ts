@@ -74,14 +74,17 @@ export default class GameManager {
     }
 
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
-        const slotVal: number = board[slot.y][slot.x]
-        const emptyVal: number = board[empty.y][empty.x]
+        // Create a deep copy of the board
+        const newBoard: Board = board.map(row => [...row]);
+        
+        // Perform swap on the copy
+        const slotVal: number = newBoard[slot.y][slot.x]
+        const emptyVal: number = newBoard[empty.y][empty.x]
 
-        board[empty.y][empty.x] = slotVal
-        board[slot.y][slot.x] = emptyVal
-        // 0 is always empty slot
+        newBoard[empty.y][empty.x] = slotVal
+        newBoard[slot.y][slot.x] = emptyVal
 
-        return board
+        return newBoard
     }
 
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
