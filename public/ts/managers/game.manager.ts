@@ -114,21 +114,27 @@ export default class GameManager {
         const openList: PQueue<Board> = new PQueue<Board>();
         const closedSet: Set<string> = new Set(); // Using serialized boards for comparison
         let gScore: Map<string, number> = new Map();
+        const parentsList: Map<string, Board> = new Map();
 
         // Initialize starting node
         const startBoard = problem.board;
-        const startKey = JSON.stringify(startBoard);
+        const startKey = Problem.serializeBoard(startBoard);
         gScore.set(startKey, 0);
         openList.enqueue(startBoard, this.heuristic(startBoard, problem.boardSize));
 
-        while (openList.size() > 0) {
-            await HTMLManager.delay(500) // Prevent UI block
 
+        let iterations: number = 0
+        const maxIterations: number = 10000
+        console.log("Solving...")
+        while (openList.size() > 0 && iterations < maxIterations) {
+            // await HTMLManager.delay(10) // Prevent UI block
+            iterations++
             const current: PQueueItem<Board> = openList.dequeue()!
             if (!current) break
-
+            
             const currentBoard = current.element
-            const currentKey = JSON.stringify(current.element)
+            const currentKey = Problem.serializeBoard(current.element)
+            console.log("x Iterations")
 
             if (problem.isGoal(currentBoard)) return {
                 success: true,
@@ -140,7 +146,7 @@ export default class GameManager {
             closedSet.add(currentKey)
 
             // Get empty slot positon
-            const emptyPos: SlotCoords | undefined = this.getEmptyPos(current.element)
+            const emptyPos: SlotCoords | undefined = this.getEmptyPos(currentBoard)
 
             // Unable to find solution if no empty position available
             if (!emptyPos) continue
@@ -149,8 +155,8 @@ export default class GameManager {
             const moves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
 
             for (const move of moves) {
-                const nextBoard: Board = this.swap(emptyPos, move, current.element)
-                const nextKey: string = JSON.stringify(nextBoard)
+                const nextBoard: Board = this.swap(emptyPos, move, currentBoard)
+                const nextKey: string = Problem.serializeBoard(nextBoard)
 
                 if (problem.isGoal(nextBoard)) return {
                     success: true,
@@ -163,12 +169,15 @@ export default class GameManager {
 
                 // If a better score was found
                 if (!gScore.has(nextKey) || gTentative < gScore.get(nextKey)!) {
+                    parentsList.set(nextKey, currentBoard)
                     gScore.set(nextKey, gTentative)
-                    const fScore = gTentative + this.heuristic(nextBoard, problem.boardSize)
 
-                    if (!gScore.has(nextKey))
-                        openList.enqueue(nextBoard, fScore, current.element)
-                    else
+                    const fScore = gTentative + this.heuristic(nextBoard, problem.boardSize)
+                    const existingCost = openList.costOf(nextBoard, Problem.compareBoards)
+
+                    if (!existingCost)
+                        openList.enqueue(nextBoard, fScore, currentBoard)
+                    else if (existingCost > fScore)
                         openList.updatePriority(nextBoard, fScore, currentBoard, Problem.compareBoards)
                 }
             }
@@ -176,7 +185,7 @@ export default class GameManager {
 
         return {
             success: false,
-            message: "No solution found"
+            message: iterations > maxIterations ? "Max iterations reached." : "No solution found."
         } as GameResponse
     }
 
