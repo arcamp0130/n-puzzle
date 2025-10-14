@@ -111,83 +111,52 @@ export default class GameManager {
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
-        const openList: PQueue<Board> = new PQueue<Board>()
-        const closeList: PQueue<Board> = new PQueue<Board>()
-        const discovered: Set<Board> = new Set<Board>()
-        const visited: Set<Board> = new Set<Board>() // Visited states, no parents
-        let iterator: number = 0
+        const openList: PQueue<Board> = new PQueue<Board>();
+        const closedSet: Set<string> = new Set(); // Using serialized boards for comparison
+        
+        // Initialize starting node
+        const startBoard = problem.board;
+        openList.enqueue(startBoard, this.heuristic(startBoard, problem.boardSize));
 
-        openList.enqueue(problem.board, 0)
-        closeList.enqueue(problem.board, 0)
-
-        // While openList is not empty
         while (openList.size() > 0) {
-            await HTMLManager.delay(500) // Prevent UI to block
-            // Ensure exiting when openList empty
-            if (openList.peek() === undefined) break
-            const current: PQueueItem<Board> = openList.dequeue()!
+            await HTMLManager.delay(500) // Prevent UI block
 
-            if (problem.isGoal(current.element)) return {
+            const current: PQueueItem<Board> = openList.dequeue()!
+            if (!current) break
+
+            const currentBoard = current.element
+            const currentKey = JSON.stringify(current.element)
+
+            if (problem.isGoal(currentBoard)) return {
                 success: true,
                 message: "Problem solved!"
             } as GameResponse
 
-            iterator++
+
+            // If wasn't solution
+            closedSet.add(currentKey)
+
+            // Empty slot positon
             const emptyPos: SlotCoords | undefined = this.getEmptyPos(current.element)
 
             // Unable to find solution if no empty position available
-            if (emptyPos === undefined) break
+            if (!emptyPos) continue
 
-            const newMoves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
-            for (const move of newMoves) {
-                const descendant: Board = this.swap(emptyPos, move, current.element)
-                const newCost = iterator + this.heuristic(descendant, problem.boardSize)
+            const moves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
 
-                // If alredy visited
-                if (visited.has(descendant)) {
-                    const cost: number | undefined
-                        = closeList.costOf(descendant, Problem.compareBoards)
+            for (const move of moves) {
+                const nextBoard: Board = this.swap(emptyPos, move, current.element)
+                const nextKey: string = JSON.stringify(nextBoard)
 
-                    // Return to open list if new cost is lower
-                    if (cost !== undefined && cost > newCost) {
-                        openList.enqueue(descendant, newCost)
-                        closeList.remove(descendant, Problem.compareBoards)
-                        continue // next move
-                    }
-
-                }
-
-                // If alredy discovered
-                if (discovered.has(descendant)) {
-                    const cost: number | undefined
-                        = openList.costOf(descendant, Problem.compareBoards)
-
-                    // Update cost element in open list if new cost is lower
-                    if (cost !== undefined && cost > newCost) {
-                        openList.updatePriority(
-                            descendant,             // new state
-                            newCost,                // new cost
-                            current.element,        // parent
-                            Problem.compareBoards   // compare function
-                        )
-                        continue // next move
-                    }
-                }
-                // console.log("Not visited or discovered")
-                // If not visited or discovered yet, add to open list and mark discovered
-                openList.enqueue(descendant, newCost)
-                discovered.add(descendant)
+                const newCost = 1 + this.heuristic(nextBoard, problem.boardSize)
             }
-            // add current to closeList and mark as visited
-            closeList.enqueue(current.element, current.cost, current.parent)
-            visited.add(current.element)
+            
 
         }
 
-        // Mock
         return {
             success: false,
-            message: "[Mock] No solution found"
+            message: "No solution found"
         } as GameResponse
     }
 
