@@ -63,19 +63,23 @@ export default class GameManager {
     }
 
     private getEmptyPos(board: Board): SlotCoords | undefined {
-        for (let i = 0; i < board.length; i++)
-            for (let j = 0; j < board[i].length; j++)
-                if (board[i][j] === 0)
-                    return { x: j, y: i }
+        for (const row of board)
+            for (const val of row)
+                if (val === 0) return {
+                    x: row.indexOf(val),
+                    y: board.indexOf(row)
+                }
 
         return undefined
     }
 
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
         const slotVal: number = board[slot.y][slot.x]
+        const emptyVal: number = board[empty.y][empty.x]
 
         board[empty.y][empty.x] = slotVal
-        board[slot.y][slot.x] = 0 // 0 is always empty slot
+        board[slot.y][slot.x] = emptyVal
+        // 0 is always empty slot
 
         return board
     }
@@ -94,7 +98,7 @@ export default class GameManager {
                 if (value === 0) continue; // Skip empty slot
 
                 // look for position of value in goal
-                const goalPos = GameManager.goalPositions.get(value)!
+                const goalPos: SlotCoords = GameManager.goalPositions.get(value)!
 
                 // Add Manhattan distance between current and goal positions
                 h += this.manhattan({ x: j, y: i }, goalPos)
@@ -115,6 +119,7 @@ export default class GameManager {
 
         // While openList is not empty
         while (openList.size() > 0) {
+            await HTMLManager.delay(500) // Prevent UI to block
             // Ensure exiting when openList empty
             if (openList.peek() === undefined) break
             const current: PQueueItem<Board> = openList.dequeue()!
@@ -165,7 +170,7 @@ export default class GameManager {
                         continue // next move
                     }
                 }
-
+                // console.log("Not visited or discovered")
                 // If not visited or discovered yet, add to open list and mark discovered
                 openList.enqueue(descendant, newCost)
                 discovered.add(descendant)
@@ -184,7 +189,6 @@ export default class GameManager {
     }
 
     public async solve(problem: Problem): Promise<GameResponse> {
-        await HTMLManager.delay(2000)
         this.initGoalPositions(problem.goal, problem.boardSize)
         try {
             return await this.aStar(problem)
