@@ -139,7 +139,7 @@ export default class GameManager {
 
                 // If not in open list yet, add it
                 // TODO: refactor skip and add new element in openList
-                if (openList.contains(descendant, Problem.compareStates)) continue
+                if (openList.contains(descendant, Problem.compareBoards)) continue
                     /* Calculate cost and add new element to openList*/
             }
             

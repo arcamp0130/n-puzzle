@@ -12,7 +12,7 @@ export default class Problem {
         this.goal = goal || GameManager.defaultGoal
     }
 
-    public static compareStates = function (
+    public static compareBoards = function (
         first: Board,
         second: Board = GameManager.defaultGoal
     ) : boolean {
@@ -25,6 +25,6 @@ export default class Problem {
     }
 
     public isGoal(state: Board): boolean {
-        return Problem.compareStates(state, this.goal)
+        return Problem.compareBoards(state, this.goal)
     }
 }
