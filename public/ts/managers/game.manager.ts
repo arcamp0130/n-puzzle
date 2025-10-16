@@ -110,24 +110,32 @@ export default class GameManager {
         return h
     }
 
-    private backtrack(
+    private async backtrack(
         goalBoard: Board,
         parentsList: Map<string, Board>,
         startBoard: Board
-    ): Board[] {
-        const path: Board[] = [goalBoard];
-        let current = goalBoard;
+    ): Promise<Array<string>> {
+        // Ensure exiting from backtrack
+        parentsList.delete(Problem.serializeBoard(startBoard))
+
+        const pathKeys: Array<string> = []
+        let current: Board | undefined = goalBoard
+
+        pathKeys.unshift(Problem.serializeBoard(current))
 
         while (Problem.serializeBoard(current) !== Problem.serializeBoard(startBoard)) {
+            await HTMLManager.delay(5) // Prevent UI to lock
+
             const currentKey = Problem.serializeBoard(current);
             const parent = parentsList.get(currentKey);
-            if (!parent) break; // Safety check
 
-            path.unshift(parent); // Add to beginning of array
+            if (!parent) break; // Safety check
+            const parentKey = Problem.serializeBoard(parent);
+
+            pathKeys.unshift(parentKey); // Add to beginning of array
             current = parent;
         }
-
-        return path;
+        return pathKeys;
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {

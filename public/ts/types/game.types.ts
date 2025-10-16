@@ -14,5 +14,5 @@ export interface BoardState {
 export interface GameResponse {
     message: string
     success: boolean
-    solution?: Board[]  // Array of board states from initial to goal
+    solutionKeys?: Array<string>  // Array of board states from initial to goal
 }
