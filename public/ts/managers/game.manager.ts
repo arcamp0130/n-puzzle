@@ -131,10 +131,10 @@ export default class GameManager {
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
-        const openList: PQueue<Board> = new PQueue<Board>();
-        const closedSet: Set<string> = new Set(); // Using serialized boards for comparison
-        let gScore: Map<string, number> = new Map();
-        const parentsList: Map<string, Board> = new Map();
+        const openList: PQueue<Board> = new PQueue<Board>()
+        const closedSet: Set<string> = new Set() // Using serialized boards for comparison
+        const parentsList: Map<string, Board> = new Map() // "Board Key": Parent
+        let gScore: Map<string, number> = new Map()
 
         // Initialize starting node
         const startBoard = problem.board;
@@ -144,26 +144,27 @@ export default class GameManager {
 
         let iterations: number = 0
         const maxIterations: number = 10000
-        console.log("Solving...")
+        
         while (openList.size() > 0 && iterations < maxIterations) {
-            // await HTMLManager.delay(10) // Prevent UI block
-            iterations++
-            const current: PQueueItem<Board> = openList.dequeue()!
-            if (!current) break
+            await HTMLManager.delay(5) // Prevent UI block
+
+            const current: PQueueItem<Board> | undefined = openList.dequeue()
+            if (!current) break // Safety check
 
             const currentBoard = current.element
             const currentKey = Problem.serializeBoard(current.element)
-            console.log("x Iterations")
 
             if (problem.isGoal(currentBoard)) {
-                const solution = this.backtrack(currentBoard, parentsList, startBoard);
+                // From solution to problem
+                const solution = await this.backtrack(currentBoard, parentsList, problem.board);
                 return {
                     success: true,
-                    message: `Solution found in ${solution.length - 1} moves!`,
-                    solution: solution
+                    message: iterations == 0
+                        ? "This' not even a problem..."
+                        : `Problem solved in ${solution.length} move${solution.length == 1 ? "" : "s"}!`,
+                    solutionKeys: solution
                 };
             }
-
 
             // If wasn't solution
             closedSet.add(currentKey)
@@ -177,27 +178,34 @@ export default class GameManager {
             // Expand next available moves
             const moves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
 
+            iterations++
+
             for (const move of moves) {
                 const nextBoard: Board = this.swap(emptyPos, move, currentBoard)
                 const nextKey: string = Problem.serializeBoard(nextBoard)
 
-                if (problem.isGoal(nextBoard)) {
-                    const solution = this.backtrack(nextBoard, parentsList, startBoard);
-                    return {
-                        success: true,
-                        message: "Problem solved!",
-                        solution: solution
-                    }
-                }
-
+                // Skip if we've already processed this state
                 if (closedSet.has(nextKey)) continue
 
+                // Calculate new path cost
                 const gTentative = gScore.get(currentKey)! + 1
 
-                // If a better score was found
+                // Only update parent and score if we find a better path
                 if (!gScore.has(nextKey) || gTentative < gScore.get(nextKey)!) {
-                    parentsList.set(nextKey, currentBoard)
                     gScore.set(nextKey, gTentative)
+                    parentsList.set(nextKey, currentBoard)  // Set parent relationship only when we find a better path
+
+                    // Check if this is the goal state
+                    if (problem.isGoal(nextBoard)) {
+                        const solution = await this.backtrack(nextBoard, parentsList, problem.board)
+                        return {
+                            success: true,
+                            message: iterations == 0
+                                ? "This' not even a problem..."
+                                : `Problem solved in ${solution.length} move${solution.length == 1 ? "" : "s"}!`,
+                            solutionKeys: solution
+                        }
+                    }
 
                     const fScore = gTentative + this.heuristic(nextBoard, problem.boardSize)
                     const existingCost = openList.costOf(nextBoard, Problem.compareBoards)
