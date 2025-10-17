@@ -122,8 +122,8 @@ export default class GameManager {
         let current: Board | undefined = goalBoard
         let currentEmpty: SlotCoords | undefined = this.getEmptyPos(current)
 
-        if (!currentEmpty) return []
-        pathCoords.unshift(currentEmpty)
+        // if (!currentEmpty) return []
+        // pathCoords.unshift(currentEmpty)
 
         while (Problem.serializeBoard(current) !== Problem.serializeBoard(startBoard)) {
             await HTMLManager.delay(5) // Prevent UI to lock
@@ -133,7 +133,6 @@ export default class GameManager {
 
             if (!parent) break; // Safety check
 
-            // const parentKey = Problem.serializeBoard(parent);
             currentEmpty = this.getEmptyPos(current);
             
             if(!currentEmpty) break; // Safety check
