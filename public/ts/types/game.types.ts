@@ -1,3 +1,5 @@
+import { SlotCoords } from "./html.types"
+
 export type Board = number[][]
 
 export interface PQueueItem<T> {
@@ -14,5 +16,5 @@ export interface BoardState {
 export interface GameResponse {
     message: string
     success: boolean
-    solutionKeys?: Array<string>  // Array of board states from initial to goal
+    solutionKeys?: Array<SlotCoords>  // Array of board states from initial to goal
 }

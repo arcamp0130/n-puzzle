@@ -1,5 +1,5 @@
 import { Board, BoardState, GameResponse, PQueueItem } from "../types/game.types"
-import { SlotCoords } from "../types/html.types"
+import { Slot, SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 
@@ -114,14 +114,16 @@ export default class GameManager {
         goalBoard: Board,
         parentsList: Map<string, Board>,
         startBoard: Board
-    ): Promise<Array<string>> {
+    ): Promise<Array<SlotCoords>> {
         // Ensure exiting from backtrack
         parentsList.delete(Problem.serializeBoard(startBoard))
 
-        const pathKeys: Array<string> = []
+        const pathCoords: Array<SlotCoords> = []
         let current: Board | undefined = goalBoard
+        let currentEmpty: SlotCoords | undefined = this.getEmptyPos(current)
 
-        pathKeys.unshift(Problem.serializeBoard(current))
+        if (!currentEmpty) return []
+        pathCoords.unshift(currentEmpty)
 
         while (Problem.serializeBoard(current) !== Problem.serializeBoard(startBoard)) {
             await HTMLManager.delay(5) // Prevent UI to lock
@@ -130,12 +132,18 @@ export default class GameManager {
             const parent = parentsList.get(currentKey);
 
             if (!parent) break; // Safety check
-            const parentKey = Problem.serializeBoard(parent);
 
-            pathKeys.unshift(parentKey); // Add to beginning of array
+            // const parentKey = Problem.serializeBoard(parent);
+            currentEmpty = this.getEmptyPos(current);
+            
+            if(!currentEmpty) break; // Safety check
+            pathCoords.unshift(currentEmpty); // Add to beginning of array
+            
             current = parent;
         }
-        return pathKeys;
+
+        console.log(pathCoords)
+        return pathCoords;
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
@@ -152,9 +160,10 @@ export default class GameManager {
 
         let iterations: number = 0
         const maxIterations: number = 10000
-        
+
         while (openList.size() > 0 && iterations < maxIterations) {
             await HTMLManager.delay(5) // Prevent UI block
+            console.log("Iteration")
 
             const current: PQueueItem<Board> | undefined = openList.dequeue()
             if (!current) break // Safety check
