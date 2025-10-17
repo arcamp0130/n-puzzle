@@ -5,6 +5,7 @@ import { HTMLManager } from "../managers/managers.index"
 
 export default class GameManager {
     private static instance: GameManager
+    private static boardSize: number | null
 
     // Store goal positions for O(1) lookup
     private static goalPositions: Map<number, SlotCoords> = new Map()
@@ -16,9 +17,7 @@ export default class GameManager {
         [13, 14, 15, 0]]
 
     // Private constructor to prevent direct instantiation
-    private constructor() {
-
-    }
+    private constructor() { }
 
     public static get Instance(): GameManager {
         if (!GameManager.instance) {
@@ -28,10 +27,15 @@ export default class GameManager {
     }
 
     // Initialize goal positions --> O(n^2)
-    private initGoalPositions(goal: Board, size: number): void {
+    private initGoalPositions(goal: Board): void {
+        if (!GameManager.boardSize) throw new Error(
+            "Internal error!"
+        )
+
+        // If not initialized yet
         if (GameManager.goalPositions.size === 0)
-            for (let i = 0; i < size; i++)
-                for (let j = 0; j < size; j++) {
+            for (let i = 0; i < GameManager.boardSize; i++)
+                for (let j = 0; j < GameManager.boardSize; j++) {
                     const value = goal[i][j]
                     if (value !== 0)  // Don't store empty tile
                         GameManager.goalPositions.set(value, { y: i, x: j })
@@ -43,7 +47,15 @@ export default class GameManager {
         GameManager.goalPositions.clear()
     }
 
-    private expandMoves(size: number, emptyPos: SlotCoords): Array<SlotCoords> {
+    private async avoidLockedUI(): Promise<void> {
+        await HTMLManager.delay(5) // Prevent UI to lock
+    }
+
+    private expandMoves(emptyPos: SlotCoords): Array<SlotCoords> {
+        if (!GameManager.boardSize) throw new Error(
+            "Internal error!"
+        )
+
         const expanded: Array<SlotCoords> = []
         const calculated: Array<SlotCoords> = [
             { x: emptyPos.x + 1, y: emptyPos.y },
@@ -53,9 +65,9 @@ export default class GameManager {
         ]
 
         for (const position of calculated) {
-            // Pass if calculated not in valid range
-            if (position.x < 0 || position.x >= size ||
-                position.y < 0 || position.y >= size) continue
+            // Skip if calculated coordinates aren't in valid ranges
+            if (position.x < 0 || position.x >= GameManager.boardSize ||
+                position.y < 0 || position.y >= GameManager.boardSize) continue
             expanded.push(position)
         }
 
@@ -75,7 +87,7 @@ export default class GameManager {
 
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
         // Create a deep copy of the board
-        const newBoard: Board = board.map(row => [...row]);
+        const newBoard: Board = board.map(row => [...row])
 
         // Perform swap on the copy
         const slotVal: number = newBoard[slot.y][slot.x]
@@ -91,14 +103,18 @@ export default class GameManager {
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
-    private heuristic(state: Board, size: number): number {
+    private heuristic(state: Board): number {
+        if (!GameManager.boardSize) throw new Error(
+            "Internal error!"
+        )
+
         let h: number = 0
 
         // For each value in state board (except 0 which is empty)
-        for (let i = 0; i < size; i++)
-            for (let j = 0; j < size; j++) {
+        for (let i = 0; i < GameManager.boardSize; i++)
+            for (let j = 0; j < GameManager.boardSize; j++) {
                 const value = state[i][j]
-                if (value === 0) continue; // Skip empty slot
+                if (value === 0) continue // Skip empty slot
 
                 // look for position of value in goal
                 const goalPos: SlotCoords = GameManager.goalPositions.get(value)!
@@ -126,43 +142,45 @@ export default class GameManager {
         // pathCoords.unshift(currentEmpty)
 
         while (Problem.serializeBoard(current) !== Problem.serializeBoard(startBoard)) {
-            await HTMLManager.delay(5) // Prevent UI to lock
+            await this.avoidLockedUI() // Prevent UI to lock
 
-            const currentKey = Problem.serializeBoard(current);
-            const parent = parentsList.get(currentKey);
+            const currentKey = Problem.serializeBoard(current)
+            const parent = parentsList.get(currentKey)
 
-            if (!parent) break; // Safety check
+            if (!parent) break // Safety check
 
-            currentEmpty = this.getEmptyPos(current);
-            
-            if(!currentEmpty) break; // Safety check
-            pathCoords.unshift(currentEmpty); // Add to beginning of array
-            
-            current = parent;
+            currentEmpty = this.getEmptyPos(current)
+
+            if (!currentEmpty) break // Safety check
+            pathCoords.unshift(currentEmpty) // Add to beginning of array
+
+            current = parent
         }
 
         console.log(pathCoords)
-        return pathCoords;
+        return pathCoords
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
+        // Data structures to use along execution
         const openList: PQueue<Board> = new PQueue<Board>()
         const closedSet: Set<string> = new Set() // Using serialized boards for comparison
         const parentsList: Map<string, Board> = new Map() // "Board Key": Parent
         let gScore: Map<string, number> = new Map()
 
-        // Initialize starting node
-        const startBoard = problem.board;
-        const startKey = Problem.serializeBoard(startBoard);
-        gScore.set(startKey, 0);
-        openList.enqueue(startBoard, this.heuristic(startBoard, problem.boardSize));
-
+        //  Conuter limits -> 0 <= x <= 10000
         let iterations: number = 0
         const maxIterations: number = 10000
 
+        // Initialize starting node
+        const startBoard = problem.board
+        const startKey = Problem.serializeBoard(startBoard)
+        gScore.set(startKey, 0)
+        openList.enqueue(startBoard, this.heuristic(startBoard))
+
         while (openList.size() > 0 && iterations < maxIterations) {
-            await HTMLManager.delay(5) // Prevent UI block
-            console.log("Iteration")
+            await this.avoidLockedUI() // Prevent UI to freeze
+            console.log("Iteration") // Only to observe behaivor in console
 
             const current: PQueueItem<Board> | undefined = openList.dequeue()
             if (!current) break // Safety check
@@ -172,14 +190,14 @@ export default class GameManager {
 
             if (problem.isGoal(currentBoard)) {
                 // From solution to problem
-                const solution = await this.backtrack(currentBoard, parentsList, problem.board);
+                const solution = await this.backtrack(currentBoard, parentsList, problem.board)
                 return {
                     success: true,
                     message: iterations == 0
                         ? "This' not even a problem..."
                         : `Problem solved in ${solution.length} move${solution.length == 1 ? "" : "s"}!`,
-                    solutionKeys: solution
-                };
+                    solution: solution
+                }
             }
 
             // If wasn't solution
@@ -192,7 +210,7 @@ export default class GameManager {
             if (!emptyPos) continue
 
             // Expand next available moves
-            const moves: Array<SlotCoords> = this.expandMoves(problem.boardSize, emptyPos)
+            const moves: Array<SlotCoords> = this.expandMoves(emptyPos)
 
             iterations++
 
@@ -219,11 +237,11 @@ export default class GameManager {
                             message: iterations == 0
                                 ? "This' not even a problem..."
                                 : `Problem solved in ${solution.length} move${solution.length == 1 ? "" : "s"}!`,
-                            solutionKeys: solution
+                            solution: solution
                         }
                     }
 
-                    const fScore = gTentative + this.heuristic(nextBoard, problem.boardSize)
+                    const fScore = gTentative + this.heuristic(nextBoard)
                     const existingCost = openList.costOf(nextBoard, Problem.compareBoards)
 
                     if (!existingCost)
@@ -234,25 +252,31 @@ export default class GameManager {
             }
         }
 
-        return {
-            success: false,
-            message: iterations > maxIterations ? "Max iterations reached." : "No solution found.",
-            solution: []
-        } as GameResponse
+        // If no solution was found or max iterations reached
+        throw new Error(
+            iterations === maxIterations
+            ? "Max iterations reached."
+            : "No solution found."
+        )
     }
 
     public async solve(problem: Problem): Promise<GameResponse> {
-        this.initGoalPositions(problem.goal, problem.boardSize)
+        
         try {
-            return await this.aStar(problem)
-        } catch (error) {
+            // Start defining problem constraints to A*
+            GameManager.boardSize = problem.boardSize
+            this.initGoalPositions(problem.goal)
+
+            return await this.aStar(problem) // Try to solve problem
+        } catch (error: any) {
             return {
                 success: false,
-                message: "Something went wrong while solving."
+                message: error.message,
+                solution: undefined
             } as GameResponse
         } finally {
             this.clearGoalPositions()
+            GameManager.boardSize = null
         }
-
     }
 }
