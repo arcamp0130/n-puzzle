@@ -11,7 +11,6 @@ export default class GameManager {
         "Internal error!"
     )
 
-
     // Store goal positions for O(1) lookup
     private static goalPositions: Map<number, SlotCoords> = new Map()
 
@@ -31,7 +30,17 @@ export default class GameManager {
         return GameManager.instance
     }
 
-    // Initialize goal positions --> O(n^2)
+    /// HELPERS
+    /// Several private methods are here in order to encapsulate and isolate
+    /// some functions that are key to solve the given n-puzzle.
+    /// Some of these helpers only hides a minor implementation and make this
+    /// project a verbose one, others hides more complex implementations that
+    /// are frequently performed in this A* algorithm, such as expanding and
+    /// swapping possitons.
+    /// This set of helpers make this project more verbose and allow devs to
+    /// better read and undersand each implementation.
+    /// 
+
     private initGoalPositions(goal: Board): void {
         if (!GameManager.boardSize)
             throw GameManager.error
@@ -111,7 +120,7 @@ export default class GameManager {
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
         if (!coords_1 || !coords_2)
             throw GameManager.error
-        
+
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
@@ -175,21 +184,38 @@ export default class GameManager {
         return pathCoords
     }
 
+    /// CORE METHODS
+    /// Both methods are highly important for game resolution. 'aStar', as its
+    /// name suggests, contains each step that A* should follow in order to
+    /// attempt to solve given n-puzzle, which contains main data structures
+    /// built within this project (Prioroty queue, Problem, etc.).
+    /// 
+    /// On the other hand, we have 'solve' public method. This' the one that
+    /// exposes game and gives to aStar all required data to solve given problem.
+    /// 
+
     private async aStar(problem: Problem): Promise<GameResponse> {
         if (!GameManager.boardSize || !problem || !problem.board || !problem.goal)
-            throw GameManager.error
+            throw GameManager.error // Safety check
 
-        // Data structures to use along execution
+        /// Data structures to use along execution
+        // Priority Queue
         const openList: PQueue<Board> = new PQueue<Board>()
-        const closedSet: Set<string> = new Set() // Using serialized boards for comparison
-        const parentsList: Map<string, Board> = new Map() // "Board Key": Parent
+
+        // Serialized boards for comparison
+        const closedSet: Set<string> = new Set()
+
+        // "Board Key": Parent
+        const parentsList: Map<string, Board> = new Map()
+
+        // "Board Key": cost
         let gScore: Map<string, number> = new Map()
 
-        //  Conuter limits -> 0 <= x <= 10000
+        //  Conuter limits -> 0 <= n <= 10000
         let iterations: number = 0
         const maxIterations: number = 10000
 
-        // Initialize starting node
+        // Initialize A* with initial board
         const startBoard = problem.board
         const startKey = Problem.serializeBoard(startBoard)
         gScore.set(startKey, 0)
@@ -231,6 +257,7 @@ export default class GameManager {
 
             iterations++
 
+            // Analyze new possible movements
             for (const move of moves) {
                 const nextBoard: Board = this.swap(emptyPos, move, currentBoard)
                 const nextKey: string = Problem.serializeBoard(nextBoard)
@@ -238,8 +265,8 @@ export default class GameManager {
                 // Skip if we've already processed this state
                 if (closedSet.has(nextKey)) continue
 
-                // Calculate new path cost
-                const gTentative = gScore.get(currentKey)! + 1
+                // Calculate new path cost: f(x) = g(x) + h(x)
+                const gTentative = 1 + gScore.get(currentKey)!
 
                 // Only update parent and score if we find a better path
                 if (!gScore.has(nextKey) || gTentative < gScore.get(nextKey)!) {
@@ -272,13 +299,12 @@ export default class GameManager {
         // If no solution was found or max iterations reached
         throw new Error(
             iterations === maxIterations
-            ? "Max iterations reached."
-            : "No solution found."
+                ? "Max iterations reached."
+                : "No solution found."
         )
     }
 
     public async solve(problem: Problem): Promise<GameResponse> {
-        
         try {
             // Start defining problem constraints to A*
             GameManager.boardSize = problem.boardSize
