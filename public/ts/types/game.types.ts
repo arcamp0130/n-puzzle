@@ -8,11 +8,6 @@ export interface PQueueItem<T> {
     parent?: T
 }
 
-export interface BoardState {
-    element: Board
-    parent?: Board
-}
-
 export interface GameResponse {
     message: string
     success: boolean

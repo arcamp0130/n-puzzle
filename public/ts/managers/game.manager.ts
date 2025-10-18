@@ -1,11 +1,15 @@
-import { Board, BoardState, GameResponse, PQueueItem } from "../types/game.types"
-import { Slot, SlotCoords } from "../types/html.types"
+import { Board, GameResponse, PQueueItem } from "../types/game.types"
+import { SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
+import { threadCpuUsage } from "process"
 
 export default class GameManager {
     private static instance: GameManager
     private static boardSize: number | null
+    private static readonly error: Error = new Error(
+        "Internal error!"
+    )
 
 
     // Store goal positions for O(1) lookup
@@ -29,9 +33,8 @@ export default class GameManager {
 
     // Initialize goal positions --> O(n^2)
     private initGoalPositions(goal: Board): void {
-        if (!GameManager.boardSize) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize)
+            throw GameManager.error
 
         // If not initialized yet
         if (GameManager.goalPositions.size === 0)
@@ -53,9 +56,8 @@ export default class GameManager {
     }
 
     private expandMoves(emptyPos: SlotCoords): Array<SlotCoords> {
-        if (!GameManager.boardSize) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize)
+            throw GameManager.error
 
         const expanded: Array<SlotCoords> = []
         const calculated: Array<SlotCoords> = [
@@ -76,9 +78,8 @@ export default class GameManager {
     }
 
     private getEmptyPos(board: Board): SlotCoords | undefined {
-        if (!GameManager.boardSize || !board) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize || !board)
+            throw GameManager.error
 
         for (const row of board)
             for (const val of row)
@@ -91,9 +92,8 @@ export default class GameManager {
     }
 
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
-        if (!GameManager.boardSize || !board) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize || !board)
+            throw GameManager.error
 
         // Create a deep copy of the board
         const newBoard: Board = board.map(row => [...row])
@@ -109,17 +109,15 @@ export default class GameManager {
     }
 
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
-        if (!coords_1 || !coords_2) throw new Error(
-            "Internal error!"
-        )
+        if (!coords_1 || !coords_2)
+            throw GameManager.error
         
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
     private heuristic(state: Board): number {
-        if (!GameManager.boardSize) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize)
+            throw GameManager.error
 
         let h: number = 0
 
@@ -144,9 +142,8 @@ export default class GameManager {
         parentsList: Map<string, Board>,
         startBoard: Board
     ): Promise<Array<SlotCoords>> {
-        if (!GameManager.boardSize || !goalBoard || !startBoard || !parentsList) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize || !goalBoard || !startBoard || !parentsList)
+            throw GameManager.error
 
         // Ensure exiting from backtrack
         parentsList.delete(Problem.serializeBoard(startBoard))
@@ -179,9 +176,8 @@ export default class GameManager {
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
-        if (!GameManager.boardSize || !problem || !problem.board || !problem.goal) throw new Error(
-            "Internal error!"
-        )
+        if (!GameManager.boardSize || !problem || !problem.board || !problem.goal)
+            throw GameManager.error
 
         // Data structures to use along execution
         const openList: PQueue<Board> = new PQueue<Board>()
