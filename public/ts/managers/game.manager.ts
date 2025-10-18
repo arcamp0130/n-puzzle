@@ -180,7 +180,6 @@ export default class GameManager {
             current = parent
         }
 
-        console.log(pathCoords)
         return pathCoords
     }
 
