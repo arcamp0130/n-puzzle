@@ -284,6 +284,20 @@ export default class HTMLManager {
         return matrix
     }
 
+    private async paintSolution(solution: Array<SlotCoords>): Promise<void> {
+        for (const coordinate of solution) {
+            const slot: HTMLElement | null = this.board.querySelector(
+                `span.slot[data-x="${coordinate.x}"][data-y="${coordinate.y}"]`
+            )
+
+            if (!slot) break; // Safety check
+
+            this.swapEmptyWith(slot, false)
+
+            await HTMLManager.delay() // Await slot to swap on-screen
+        }
+    }
+
     /** ACTIONS
      * These methods are called when solve, restart and mix buttons are
      * pressed. May be called more than once, but they only have a single
@@ -303,12 +317,16 @@ export default class HTMLManager {
             this.boardSize,
         ))
 
-        this.toggleInputs() // Enabled
-
         this.updateAlert({
             status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
             message: res.message
         } as Alert)
+
+        if (res.success && res.solution)
+            await this.paintSolution(res.solution)
+
+        this.toggleInputs() // Enabled
+
     }
 
     private restartGame(): void {
