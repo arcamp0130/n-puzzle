@@ -7,6 +7,7 @@ export default class GameManager {
     private static instance: GameManager
     private static boardSize: number | null
 
+
     // Store goal positions for O(1) lookup
     private static goalPositions: Map<number, SlotCoords> = new Map()
 
@@ -75,6 +76,10 @@ export default class GameManager {
     }
 
     private getEmptyPos(board: Board): SlotCoords | undefined {
+        if (!GameManager.boardSize || !board) throw new Error(
+            "Internal error!"
+        )
+
         for (const row of board)
             for (const val of row)
                 if (val === 0) return {
@@ -86,6 +91,10 @@ export default class GameManager {
     }
 
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
+        if (!GameManager.boardSize || !board) throw new Error(
+            "Internal error!"
+        )
+
         // Create a deep copy of the board
         const newBoard: Board = board.map(row => [...row])
 
@@ -100,6 +109,10 @@ export default class GameManager {
     }
 
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
+        if (!coords_1 || !coords_2) throw new Error(
+            "Internal error!"
+        )
+        
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
@@ -131,6 +144,10 @@ export default class GameManager {
         parentsList: Map<string, Board>,
         startBoard: Board
     ): Promise<Array<SlotCoords>> {
+        if (!GameManager.boardSize || !goalBoard || !startBoard || !parentsList) throw new Error(
+            "Internal error!"
+        )
+
         // Ensure exiting from backtrack
         parentsList.delete(Problem.serializeBoard(startBoard))
 
@@ -162,6 +179,10 @@ export default class GameManager {
     }
 
     private async aStar(problem: Problem): Promise<GameResponse> {
+        if (!GameManager.boardSize || !problem || !problem.board || !problem.goal) throw new Error(
+            "Internal error!"
+        )
+
         // Data structures to use along execution
         const openList: PQueue<Board> = new PQueue<Board>()
         const closedSet: Set<string> = new Set() // Using serialized boards for comparison
