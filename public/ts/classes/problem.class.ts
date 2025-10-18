@@ -12,19 +12,19 @@ export default class Problem {
         this.goal = goal || GameManager.defaultGoal
     }
 
-    public static compareStates = function (
+    public static serializeBoard(board: Board): string {
+        return board.map(row => row.join(',')).join('|');
+    }
+
+    public static compareBoards = function (
         first: Board,
-        second: Board = GameManager.defaultGoal
-    ) : boolean {
-
-        // Serialize both states to compare
-        const jsonFirst = JSON.stringify(first)
-        const jsonSecond = JSON.stringify(second)
-
-        return jsonFirst === jsonSecond
+        second: Board
+    ): boolean {
+        if (!first || !second) return false;
+        return Problem.serializeBoard(first) === Problem.serializeBoard(second);
     }
 
     public isGoal(state: Board): boolean {
-        return Problem.compareStates(state, this.goal)
+        return Problem.compareBoards(state, this.goal)
     }
 }

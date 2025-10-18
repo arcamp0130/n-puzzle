@@ -5,11 +5,11 @@ export type Board = number[][]
 export interface PQueueItem<T> {
     element: T
     cost: number
+    parent?: T
 }
 
 export interface GameResponse {
     message: string
     success: boolean
+    solution?: Array<SlotCoords>  // Array of board states from initial to goal
 }
-
-export { SlotCoords }
