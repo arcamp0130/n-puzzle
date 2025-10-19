@@ -291,7 +291,8 @@ export default class HTMLManager {
                 `span.slot[data-x="${coordinate.x}"][data-y="${coordinate.y}"]`
             )
 
-            if (!slot) break; // Safety check
+            if (!slot) throw new Error("Something went wrong while showing solution"); // Safety check
+
             this.updateAlert({
                 status: AlertStatus.WARNING,
                 message: `${solution.length - i} moves left`
@@ -322,17 +323,22 @@ export default class HTMLManager {
             this.boardSize,
         ))
 
-        if (res.success && res.solution)
-            await this.paintSolution(res.solution)
+        try {
+            if (res.success && res.solution)
+                await this.paintSolution(res.solution)
 
-
-        this.updateAlert({
-            status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
-            message: res.message
-        } as Alert)
+            this.updateAlert({
+                status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
+                message: res.message
+            } as Alert)
+        } catch (error: any) {
+            this.updateAlert({
+                status: AlertStatus.ERROR,
+                message: error.message
+            } as Alert)
+        }
 
         this.toggleInputs() // Enabled
-
     }
 
     private restartGame(): void {
