@@ -284,6 +284,26 @@ export default class HTMLManager {
         return matrix
     }
 
+    private async paintSolution(solution: Array<SlotCoords>): Promise<void> {
+        let i: number = 0
+        for (const coordinate of solution) {
+            const slot: HTMLElement | null = this.board.querySelector(
+                `span.slot[data-x="${coordinate.x}"][data-y="${coordinate.y}"]`
+            )
+
+            if (!slot) throw new Error("Something went wrong while showing solution"); // Safety check
+
+            this.updateAlert({
+                status: AlertStatus.WARNING,
+                message: `${solution.length - i} moves left`
+            } as Alert)
+            this.swapEmptyWith(slot, false)
+
+            await HTMLManager.delay() // Await slot to swap on-screen
+            i++
+        }
+    }
+
     /** ACTIONS
      * These methods are called when solve, restart and mix buttons are
      * pressed. May be called more than once, but they only have a single
@@ -303,12 +323,22 @@ export default class HTMLManager {
             this.boardSize,
         ))
 
-        this.toggleInputs() // Enabled
+        try {
+            if (res.success && res.solution)
+                await this.paintSolution(res.solution)
 
-        this.updateAlert({
-            status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
-            message: res.message
-        } as Alert)
+            this.updateAlert({
+                status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
+                message: res.message
+            } as Alert)
+        } catch (error: any) {
+            this.updateAlert({
+                status: AlertStatus.ERROR,
+                message: error.message
+            } as Alert)
+        }
+
+        this.toggleInputs() // Enabled
     }
 
     private restartGame(): void {
