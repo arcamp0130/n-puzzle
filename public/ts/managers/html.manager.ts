@@ -285,16 +285,21 @@ export default class HTMLManager {
     }
 
     private async paintSolution(solution: Array<SlotCoords>): Promise<void> {
+        let i: number = 0
         for (const coordinate of solution) {
             const slot: HTMLElement | null = this.board.querySelector(
                 `span.slot[data-x="${coordinate.x}"][data-y="${coordinate.y}"]`
             )
 
             if (!slot) break; // Safety check
-
+            this.updateAlert({
+                status: AlertStatus.WARNING,
+                message: `${solution.length - i} moves left`
+            } as Alert)
             this.swapEmptyWith(slot, false)
 
             await HTMLManager.delay() // Await slot to swap on-screen
+            i++
         }
     }
 
@@ -317,13 +322,14 @@ export default class HTMLManager {
             this.boardSize,
         ))
 
+        if (res.success && res.solution)
+            await this.paintSolution(res.solution)
+
+
         this.updateAlert({
             status: res.success ? AlertStatus.SUCCESS : AlertStatus.ERROR,
             message: res.message
         } as Alert)
-
-        if (res.success && res.solution)
-            await this.paintSolution(res.solution)
 
         this.toggleInputs() // Enabled
 
