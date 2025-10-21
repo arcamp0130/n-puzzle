@@ -39,12 +39,12 @@ export default class HTMLManager {
             this.init()
     }
 
-    /** CORE METHODS
-     * The following core functions are essential to properly intantiate this class
-     * following a singleton design pattern, generate game board on screen, toggle
-     * several element in screen, such as inputs and board cover, among other
-     * functions.
-    */
+    /// CORE METHODS
+    /// The following core functions are essential to properly intantiate this class
+    /// following a singleton design pattern, generate game board on screen, toggle
+    /// several element in screen, such as inputs and board cover, among other
+    /// functions.
+    /// 
 
     public static get Instance(): HTMLManager {
         if (!HTMLManager.instance) {
@@ -90,12 +90,12 @@ export default class HTMLManager {
     }
 
 
-    /** ADD LISTENERS
-     * As part of game initialization, is required to append listeners to
-     * several elements in DOM, these being game slots and buttons.
-     * These are only two methods, and addSlotListeners is the only one that
-     * is called more than once.
-     */
+    /// ADD LISTENERS
+    /// As part of game initialization, is required to append listeners to
+    /// several elements in DOM, these being game slots and buttons.
+    /// These are only two methods, and addSlotListeners is the only one that
+    /// is called more than once.
+    /// 
 
     private addSlotsListeners(): void {
         const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
@@ -119,11 +119,11 @@ export default class HTMLManager {
     }
 
 
-    /** TOGGLE 
-     * These methods are used to disable and enable, when required, buttons,
-     * text fields (mix movements) and board cover, so user can't modify any game
-     * parameter when any algorithm is in execution.
-     */
+    /// TOGGLE 
+    /// These methods are used to disable and enable, when required, buttons,
+    /// text fields (mix movements) and board cover, so user can't modify any game
+    /// parameter when any algorithm is in execution.
+    /// 
 
     private toggleCover(): void {
         this.cover.style.display
@@ -139,14 +139,14 @@ export default class HTMLManager {
     }
 
 
-    /** HELPERS
-     * Lots of main methods are included here, some with an easy and short
-     * logic, others quite complex.
-     * 
-     * These helpers are important to allow several methods to work properly
-     * and avoid rewritting code. Larger helpers are used to handle board
-     * auto-mix.
-     */
+    /// HELPERS
+    /// Lots of main methods are included here, some with an easy and short
+    /// logic, others quite complex.
+    /// 
+    /// These helpers are important to allow several methods to work properly
+    /// and avoid rewritting code. Larger helpers are used to handle board
+    /// auto-mix.
+    /// 
 
     public static async delay(ms: number | null = null): Promise<void> {
         return new Promise(_ => setTimeout(_, ms || HTMLManager.stepDelay));
@@ -303,11 +303,11 @@ export default class HTMLManager {
         }
     }
 
-    /** ACTIONS
-     * These methods are called when solve, restart and mix buttons are
-     * pressed. May be called more than once, but they only have a single
-     * reference within this file.
-     */
+    /// ACTIONS
+    /// These methods are called when solve, restart and mix buttons are
+    /// pressed. May be called more than once, but they only have a single
+    /// reference within this file.
+    /// 
 
     private async solveGame(): Promise<void> {
         const GameMgr = GameManager.Instance
