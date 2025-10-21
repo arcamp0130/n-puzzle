@@ -2,7 +2,6 @@ import { Board, GameResponse, PQueueItem } from "../types/game.types"
 import { SlotCoords } from "../types/html.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
-import { threadCpuUsage } from "process"
 
 export default class GameManager {
     private static instance: GameManager
@@ -160,9 +159,6 @@ export default class GameManager {
         const pathCoords: Array<SlotCoords> = []
         let current: Board | undefined = goalBoard
         let currentEmpty: SlotCoords | undefined = this.getEmptyPos(current)
-
-        // if (!currentEmpty) return []
-        // pathCoords.unshift(currentEmpty)
 
         while (Problem.serializeBoard(current) !== Problem.serializeBoard(startBoard)) {
             await this.avoidLockedUI() // Prevent UI to lock

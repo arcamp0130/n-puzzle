@@ -11,5 +11,5 @@ export interface PQueueItem<T> {
 export interface GameResponse {
     message: string
     success: boolean
-    solution?: Array<SlotCoords>  // Array of board states from initial to goal
+    solution?: Array<SlotCoords>  // Array of emptySlot positions
 }

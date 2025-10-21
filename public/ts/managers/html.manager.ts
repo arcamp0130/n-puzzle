@@ -270,7 +270,6 @@ export default class HTMLManager {
             Array(this.boardSize).fill(0).map(() =>
                 Array(this.boardSize).fill(0))
 
-
         for (const slot of slots) {
             const coords: SlotCoords = {
                 x: parseInt(slot.dataset.x as string),
