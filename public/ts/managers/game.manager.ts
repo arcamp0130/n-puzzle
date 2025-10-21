@@ -40,6 +40,11 @@ export default class GameManager {
     /// better read and undersand each implementation.
     /// 
 
+    /**
+     * Pre-calculates all goal positions when game starts in order to simplify
+     * complexity when consulting goal game tokens positions
+     * @param goal An n-sized board, same as `GameManager.boardSize`.
+     */
     private initGoalPositions(goal: Board): void {
         if (!GameManager.boardSize)
             throw GameManager.error
@@ -55,14 +60,28 @@ export default class GameManager {
                 }
     }
 
+    /**
+     * Empties goal game tokens positions when search ends. 
+     */
     private clearGoalPositions(): void {
         GameManager.goalPositions.clear()
     }
 
+    /**
+     * Adds a 5ms delay when called in order to prevent UI to lock, usefull when solving game.
+     */
     private async avoidLockedUI(): Promise<void> {
         await HTMLManager.delay(5) // Prevent UI to lock
     }
 
+    /**
+     * Generates a list of new movements that are valid within game board in order to swap empty 
+     * slot (zero value) with any surrounding game token (different of zero).
+     * @param emptyPos Argument of type `SlotCoords` that represents the coordinates of current
+     * empty slot to expand it. 
+     * @returns An array of `SlotCoords` that containts a valid list of possible swaps
+     * between given `emptySlot` and game token.
+     */
     private expandMoves(emptyPos: SlotCoords): Array<SlotCoords> {
         if (!GameManager.boardSize)
             throw GameManager.error
@@ -85,6 +104,12 @@ export default class GameManager {
         return expanded
     }
 
+    /**
+     * A function that gets current position of empty slot in a board (cell with zero-value).
+     * @param board An n*n matrix that represents a board with a cell with value zero.
+     * @returns A `SlotCoords` value which represents current position of empty cell (zero value)
+     * or `undefined` if none found. If `undefined` is returned, an internal error is present.
+     */
     private getEmptyPos(board: Board): SlotCoords | undefined {
         if (!GameManager.boardSize || !board)
             throw GameManager.error
@@ -99,6 +124,13 @@ export default class GameManager {
         return undefined
     }
 
+    /**
+     * Swaps two values in a given board in order to swap a game token with empty slot.
+     * @param empty Coordinates of empty slot.
+     * @param slot Coordinates of game token to swap with empty slot.
+     * @param board A board to work with and swap both slot and empty positions values.
+     * @returns A new board that represents a new state with swapped game tokens. 
+     */
     private swap(empty: SlotCoords, slot: SlotCoords, board: Board): Board {
         if (!GameManager.boardSize || !board)
             throw GameManager.error
@@ -116,6 +148,16 @@ export default class GameManager {
         return newBoard
     }
 
+    /**
+     * Calculates Manhattan distance between two points in a board. Here we usually
+     * compare current game token position in a given state with its counterpart
+     * within goal board (goal position).
+     * 
+     * `|x_1 - x_2| + |y_1 - y_2|`
+     * @param coords_1 Coordinates of first position.
+     * @param coords_2 Coordinates of second position.
+     * @returns A number that represents manhattan distance between both coordinates.
+     */
     private manhattan(coords_1: SlotCoords, coords_2: SlotCoords): number {
         if (!coords_1 || !coords_2)
             throw GameManager.error
@@ -123,6 +165,11 @@ export default class GameManager {
         return Math.abs(coords_1.x - coords_2.x) + Math.abs(coords_1.y - coords_2.y)
     }
 
+    /**
+     * A given heuristic to calculate how costly is this node when exploring a graph (n-puzzle graph).
+     * @param state Current board to calculate its cost if attempting to evaluate at A*.
+     * @returns A number that represents the cost if trying to evaluate.
+     */
     private heuristic(state: Board): number {
         if (!GameManager.boardSize)
             throw GameManager.error
@@ -145,6 +192,14 @@ export default class GameManager {
         return h
     }
 
+    /**
+     * This method is only used when A* found a path to reach a given goal. 
+     * @param goalBoard The board that A* attempted to reach.
+     * @param parentsList The generated list of board parents to allow a proper backtrack
+     * @param startBoard The initial board of the problem, where A* started from.
+     * @returns An arranged list of `SlotCoords`, from start to end (goal), which represents
+     * the _journey_ that the empty slot did.
+     */
     private async backtrack(
         goalBoard: Board,
         parentsList: Map<string, Board>,
