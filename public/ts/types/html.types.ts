@@ -22,7 +22,7 @@ export type Slot = {
     status: SlotStatus
 }
 
-export interface SlotCoords {
+export type SlotCoords = {
     x: number,
     y: number
 }
