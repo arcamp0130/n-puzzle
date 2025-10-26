@@ -244,6 +244,14 @@ export default class GameManager {
     /// exposes game and gives to aStar all required data to solve given problem.
     /// 
 
+    /**
+     * This method implement an A* search alogirthm to attempt to solve a given
+     * n-puzzle problem that user has submitted from UI. It always uses a 5ms delay
+     * to avoid UI to lock (see `avoidLockedUI` method).
+     * @param problem An instance of `Problem` class.
+     * @returns an object of `GameResponse` type with success status, message and
+     * solution (if any).
+     */
     private async aStar(problem: Problem): Promise<GameResponse> {
         if (!GameManager.boardSize || !problem || !problem.board || !problem.goal)
             throw GameManager.error // Safety check
@@ -258,7 +266,7 @@ export default class GameManager {
         // "Board Key": Parent
         const parentsList: Map<string, Board> = new Map()
 
-        // "Board Key": cost
+        // "Board Key": g cost
         let gScore: Map<string, number> = new Map()
 
         //  Conuter limits -> 0 <= n <= 10000
@@ -271,9 +279,12 @@ export default class GameManager {
         gScore.set(startKey, 0)
         openList.enqueue(startBoard, this.heuristic(startBoard))
 
-        while (openList.size() > 0 && iterations < maxIterations) {
+        // Search while not empty queue and max iterations not reached yet.
+        while (!openList.isEmpty() && iterations < maxIterations) {
             await this.avoidLockedUI() // Prevent UI to freeze
-            console.log("Iteration") // Only to observe behaivor in console
+            // Only to observe behaivor in console
+            // Consider replacing it with a circle progress indicator or countdow
+            console.log("Iteration")
 
             const current: PQueueItem<Board> | undefined = openList.dequeue()
             if (!current) break // Safety check
@@ -281,12 +292,12 @@ export default class GameManager {
             const currentBoard = current.element
             const currentKey = Problem.serializeBoard(current.element)
 
+            // If solution found right after dequeue
             if (problem.isGoal(currentBoard)) {
-                // From solution to problem
                 const solution = await this.backtrack(currentBoard, parentsList, problem.board)
                 return {
                     success: true,
-                    message: iterations == 0
+                    message: iterations === 0
                         ? "This' not even a problem..."
                         : `Problem solved in ${solution.length} move${solution.length == 1 ? "" : "s"}!`,
                     solution: solution
@@ -296,7 +307,7 @@ export default class GameManager {
             // If wasn't solution
             closedSet.add(currentKey)
 
-            // Get empty slot positon
+            // Get empty slot positon from current board
             const emptyPos: SlotCoords | undefined = this.getEmptyPos(currentBoard)
 
             // Unable to find solution if no empty position available
@@ -307,7 +318,7 @@ export default class GameManager {
 
             iterations++
 
-            // Analyze new possible movements
+            // Analyze next movements
             for (const move of moves) {
                 const nextBoard: Board = this.swap(emptyPos, move, currentBoard)
                 const nextKey: string = Problem.serializeBoard(nextBoard)
@@ -315,10 +326,10 @@ export default class GameManager {
                 // Skip if we've already processed this state
                 if (closedSet.has(nextKey)) continue
 
-                // Calculate new path cost: f(x) = g(x) + h(x)
+                // Calculate new g(x) likely to be used
                 const gTentative = 1 + gScore.get(currentKey)!
 
-                // Only update parent and score if we find a better path
+                // Only update parent and score if we've found a better path
                 if (!gScore.has(nextKey) || gTentative < gScore.get(nextKey)!) {
                     gScore.set(nextKey, gTentative)
                     parentsList.set(nextKey, currentBoard)  // Set parent relationship only when we find a better path
@@ -328,16 +339,19 @@ export default class GameManager {
                         const solution = await this.backtrack(nextBoard, parentsList, problem.board)
                         return {
                             success: true,
-                            message: iterations == 0
+                            message: iterations === 0
                                 ? "This' not even a problem..."
                                 : `Problem solved in ${solution.length} move${solution.length == 1 ? "" : "s"}!`,
                             solution: solution
                         }
                     }
 
+                    // Calculate new f score with gScore and heuristic
+                    // f(x) = g(x) + h(x)
                     const fScore = gTentative + this.heuristic(nextBoard)
                     const existingCost = openList.costOf(nextBoard, Problem.compareBoards)
 
+                    // Update cost or enqueue new element when needed
                     if (!existingCost)
                         openList.enqueue(nextBoard, fScore, currentBoard)
                     else if (existingCost > fScore)
@@ -354,6 +368,13 @@ export default class GameManager {
         )
     }
 
+    /**
+     * Exposes A* implementation to allow user to submit their board (problem) and
+     * allow algorithm to solve it. In this sense, A* starts searching a path to solve
+     * a given problem. Check `GameReponse` type to get to know more about return type.
+     * @param problem An instance of `Problem` class properly initialized.
+     * @returns A response of type `GameResponse` with status from solution.
+     */
     public async solve(problem: Problem): Promise<GameResponse> {
         try {
             // Start defining problem constraints to A*
@@ -368,6 +389,7 @@ export default class GameManager {
                 solution: undefined
             } as GameResponse
         } finally {
+            // Clear constraints of A*
             this.clearGoalPositions()
             GameManager.boardSize = null
         }
