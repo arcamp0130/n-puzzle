@@ -332,10 +332,11 @@ export default class HTMLManager {
 
         await HTMLManager.delay()  // Prevent UI to lock
     }
-/**
- * Generates board on UI as a matrix.
- * @returns Board on UI as matrix
- */
+    
+    /**
+     * Generates board on UI as a matrix.
+     * @returns Board on UI as matrix
+     */
     private getBoardMatrix(): Board {
         const slots: NodeListOf<HTMLSpanElement>
             = this.board.querySelectorAll(
