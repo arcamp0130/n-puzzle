@@ -8,7 +8,7 @@ export default class HTMLManager {
     public static stepDelay: number = 200
 
     private boardSize: number = 4
-    private defaultAlert: Alert = {
+    private readonly defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
     }

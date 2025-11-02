@@ -1,9 +1,9 @@
 import { PQueueItem } from "../types/game.types"
 
 export default class PQueue<T> {
-    private items: PQueueItem<T>[] = []
+    private items: PQueueItem<T>[]
 
-    constructor() { }
+    constructor() { this.items = [] }
 
     // Binary search to arrange array. Lower-cost element at pos 0
     public enqueue(element: T, cost: number, parent?: T): void {

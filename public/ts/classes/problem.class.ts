@@ -4,7 +4,7 @@ export default class Problem {
     public readonly board: Board
     public readonly boardSize: number
     public readonly goal: Board
-    public static defaultGoal: Board = [
+    public static readonly defaultGoal: Board = [
         [1, 2, 3, 4],
         [5, 6, 7, 8],
         [9, 10, 11, 12],
