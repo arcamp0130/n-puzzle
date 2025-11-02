@@ -1,5 +1,5 @@
-import { GameResponse, PQueueItem } from "../types/game.types"
-import { Board, SlotCoords } from "../types/shared.types"
+import { PQueueItem } from "../types/game.types"
+import { Board, SlotCoords, GameResponse } from "../types/shared.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 
@@ -12,12 +12,6 @@ export default class GameManager {
 
     // Store goal positions for O(1) lookup
     private static goalPositions: Map<number, SlotCoords> = new Map()
-
-    public static defaultGoal: Board =
-        [[1, 2, 3, 4],
-        [5, 6, 7, 8],
-        [9, 10, 11, 12],
-        [13, 14, 15, 0]]
 
     // Private constructor to prevent direct instantiation
     private constructor() { }

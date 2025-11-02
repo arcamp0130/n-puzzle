@@ -1,10 +1,15 @@
-import { Board } from "../types/game.types"
-import { GameManager } from "../managers/managers.index"
+import { Board } from "../types/shared.types"
 
 export default class Problem {
     public readonly board: Board
     public readonly boardSize: number
     public readonly goal: Board
+    public static defaultGoal: Board = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+        [13, 14, 15, 0]
+    ]
 
     /**
      * ## Constructor.
@@ -17,7 +22,7 @@ export default class Problem {
     public constructor(board: Board, boardSize: number, goal?: Board,) {
         this.board = board
         this.boardSize = boardSize
-        this.goal = goal || GameManager.defaultGoal
+        this.goal = goal || Problem.defaultGoal
     }
 
     /**

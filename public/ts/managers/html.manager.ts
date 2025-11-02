@@ -1,7 +1,6 @@
 import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
-import { Board, SlotCoords } from "../types/shared.types"
+import { Board, SlotCoords, GameResponse } from "../types/shared.types"
 import { Problem } from "../classes/classes.index"
-import { GameResponse } from "../types/game.types"
 import { GameManager } from "./managers.index"
 
 export default class HTMLManager {
