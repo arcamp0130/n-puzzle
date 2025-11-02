@@ -1,5 +1,5 @@
-import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
-import { Board } from "../types/game.types"
+import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
+import { Board, SlotCoords } from "../types/shared.types"
 import { Problem } from "../classes/classes.index"
 import { GameResponse } from "../types/game.types"
 import { GameManager } from "./managers.index"

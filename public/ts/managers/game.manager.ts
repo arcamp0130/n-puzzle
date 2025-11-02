@@ -1,5 +1,5 @@
-import { Board, GameResponse, PQueueItem } from "../types/game.types"
-import { SlotCoords } from "../types/html.types"
+import { GameResponse, PQueueItem } from "../types/game.types"
+import { Board, SlotCoords } from "../types/shared.types"
 import { Problem, PQueue } from "../classes/classes.index"
 import { HTMLManager } from "../managers/managers.index"
 

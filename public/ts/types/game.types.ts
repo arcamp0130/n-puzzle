@@ -1,6 +1,4 @@
-import { SlotCoords } from "./html.types"
-
-export type Board = number[][]
+import { SlotCoords } from "./shared.types"
 
 export type PQueueItem<T> = {
     element: T
@@ -11,5 +9,5 @@ export type PQueueItem<T> = {
 export type GameResponse = {
     message: string
     success: boolean
-    solution?: Array<SlotCoords>  // Array of emptySlot positions
+    solution?: Array<SlotCoords>
 }
