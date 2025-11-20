@@ -21,8 +21,3 @@ export type Slot = {
     value: string,
     status: SlotStatus
 }
-
-export interface SlotCoords {
-    x: number,
-    y: number
-}

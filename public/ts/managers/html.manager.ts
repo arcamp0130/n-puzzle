@@ -1,7 +1,6 @@
-import { Alert, AlertStatus, Slot, SlotStatus, SlotCoords } from "../types/html.types"
-import { Board } from "../types/game.types"
+import { Alert, AlertStatus, Slot, SlotStatus } from "../types/html.types"
+import { Board, SlotCoords, GameResponse } from "../types/shared.types"
 import { Problem } from "../classes/classes.index"
-import { GameResponse } from "../types/game.types"
 import { GameManager } from "./managers.index"
 
 export default class HTMLManager {
@@ -9,7 +8,7 @@ export default class HTMLManager {
     public static stepDelay: number = 200
 
     private boardSize: number = 4
-    private defaultAlert: Alert = {
+    private readonly defaultAlert: Alert = {
         status: AlertStatus.IDLE,
         message: "Start playing!"
     }
@@ -39,12 +38,12 @@ export default class HTMLManager {
             this.init()
     }
 
-    /** CORE METHODS
-     * The following core functions are essential to properly intantiate this class
-     * following a singleton design pattern, generate game board on screen, toggle
-     * several element in screen, such as inputs and board cover, among other
-     * functions.
-    */
+    /// CORE METHODS
+    /// The following core functions are essential to properly intantiate this class
+    /// following a singleton design pattern, generate game board on screen, toggle
+    /// several element in screen, such as inputs and board cover, among other
+    /// functions.
+    /// 
 
     public static get Instance(): HTMLManager {
         if (!HTMLManager.instance) {
@@ -53,26 +52,37 @@ export default class HTMLManager {
         return HTMLManager.instance
     }
 
+    /**
+     * Initialize UI to allow user to interact with game.
+     * @returns nothing
+     */
     private init(): void {
         this.generateGame()
         this.addButtonsListeners()
         this.updateAlert(this.defaultAlert)
     }
 
+    /**
+     * Generates and paints a solved game on-screen by removing the previous
+     * one and replacing it with the solved one.
+     * @returns nothing
+     */
     private generateGame(): void {
         const slot = document.createElement("span")
+        // Precalculate slot value to actually be zero
         const lastSlotVal = this.boardSize * this.boardSize
 
         slot.classList.add("slot")
-        this.board.innerHTML = ""
+        this.board.innerHTML = "" // Clear board
 
-        // Generating gameboard
-        for (let i = 0; i < this.boardSize; i++) { // y possition
-            for (let j = 0; j < this.boardSize; j++) { // x possition
-                const index = (i * this.boardSize) + (j + 1)
-                slot.innerHTML = ""
-                slot.dataset.y = `${i}`
-                slot.dataset.x = `${j}`
+        // Generating board
+        for (let y = 0; y < this.boardSize; y++) { // y possition
+            for (let x = 0; x < this.boardSize; x++) { // x possition
+                // Calculate slot value
+                const index = (y * this.boardSize) + (x + 1)
+                slot.innerHTML = "" // Clear slot data
+                slot.dataset.y = `${y}`
+                slot.dataset.x = `${x}`
 
                 if (index !== lastSlotVal) {
                     slot.innerHTML = `${index}`
@@ -81,6 +91,7 @@ export default class HTMLManager {
                     slot.dataset.status = SlotStatus.EMPTY
                 }
 
+                // Add game token in board
                 this.board.appendChild(slot.cloneNode(true))
 
             } // end x pos
@@ -90,13 +101,18 @@ export default class HTMLManager {
     }
 
 
-    /** ADD LISTENERS
-     * As part of game initialization, is required to append listeners to
-     * several elements in DOM, these being game slots and buttons.
-     * These are only two methods, and addSlotListeners is the only one that
-     * is called more than once.
-     */
+    /// ADD LISTENERS
+    /// As part of game initialization, is required to append listeners to
+    /// several elements in DOM, these being game slots and buttons.
+    /// These are only two methods, and addSlotListeners is the only one that
+    /// is called more than once.
+    /// 
 
+    /**
+     * Gets all slots in board and append a click listener to attempt to
+     * swap clicked slot with the empty one. No arguments or return.
+     * 
+     */
     private addSlotsListeners(): void {
         const slots = document.querySelectorAll("span.slot") as NodeListOf<HTMLElement>
         slots.forEach(slot => {
@@ -106,6 +122,13 @@ export default class HTMLManager {
         })
     }
 
+    /**
+     * Called once in page lifespan.
+     * 
+     * Appends click listeners to solve, reset and mix buttons to allow client
+     * to interact with game.
+     * @returns nothing
+     */
     private addButtonsListeners(): void {
         this.buttons["solve"].addEventListener("click", async () =>
             await this.solveGame()
@@ -119,17 +142,28 @@ export default class HTMLManager {
     }
 
 
-    /** TOGGLE 
-     * These methods are used to disable and enable, when required, buttons,
-     * text fields (mix movements) and board cover, so user can't modify any game
-     * parameter when any algorithm is in execution.
-     */
+    /// TOGGLE 
+    /// These methods are used to disable and enable, when required, buttons,
+    /// text fields (mix movements) and board cover, so user can't modify any game
+    /// parameter when any algorithm is in execution.
+    /// 
 
+    /**
+     * Activates or deactivates invisible cover to allow or avoid client to modify
+     * board and set a new problem.
+     * @returns nothing
+     */
     private toggleCover(): void {
         this.cover.style.display
             = this.cover.style.display === "flex" ? "none" : "flex"
     }
 
+    /**
+     * Activates or deactivates buttons and text fields on screen to allow or avoid
+     * client to attempt to mix or reset board, or submbit problem. Also calls to
+     * `toggleCover` to apply same changes.
+     * @returns nothing
+     */
     private toggleInputs(): void {
         this.movesInput.disabled = !this.movesInput.disabled
         for (const button in this.buttons) {
@@ -139,28 +173,50 @@ export default class HTMLManager {
     }
 
 
-    /** HELPERS
-     * Lots of main methods are included here, some with an easy and short
-     * logic, others quite complex.
-     * 
-     * These helpers are important to allow several methods to work properly
-     * and avoid rewritting code. Larger helpers are used to handle board
-     * auto-mix.
-     */
+    /// HELPERS
+    /// Lots of main methods are included here, some with an easy and short
+    /// logic, others quite complex.
+    /// 
+    /// These helpers are important to allow several methods to work properly
+    /// and avoid rewritting code. Larger helpers are used to handle board
+    /// auto-mix.
+    /// 
 
+    /**
+     * Stops any execution to add a time gap and, after elapsed time, resume proccess.
+     * @param ms time to pause proccess (miliseconds).
+     * @returns nothing
+     */
     public static async delay(ms: number | null = null): Promise<void> {
         return new Promise(_ => setTimeout(_, ms || HTMLManager.stepDelay));
     }
 
+    /**
+     * Generates a random integer in range, including ends.
+     * @param min lower limit.
+     * @param max upper limit.
+     * @returns a random integer.
+     */
     private randomInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    /**
+     * Updates alert on UI to notify client about anything that user must
+     * know about the game.
+     * @param newAlert An object of type `Alert`.
+     * @returns nothing
+     */
     private updateAlert(newAlert: Alert): void {
         this.alert.container.dataset.status = newAlert.status
         this.alert.message.innerHTML = newAlert.message
     }
 
+    /**
+     * Generates a list of available slots to swap with given empty slot on UI.
+     * @param empty position of empty slot in UI.
+     * @returns A list of coordinates of valid moves from empty slot.
+     */
     private expandEmpty(empty: SlotCoords): Array<SlotCoords> {
         const neigbhors: Array<SlotCoords> = [
             { x: empty.x - 1, y: empty.y } as SlotCoords,
@@ -181,6 +237,13 @@ export default class HTMLManager {
         return expanded
     }
 
+    /**
+     * Compares two slots and checks if are able to swap. In this sense, `empty` parammeter
+     * MUST be an empty slot.
+     * @param empty (suposed) empty slot.
+     * @param slot Slot to swap with (suposed) empty.
+     * @returns `true` if it's a valid swap, `false` otherwise.
+     */
     private isValidSwap(empty: Slot, slot: Slot): boolean {
         if (empty.value === slot.value) return false
 
@@ -201,6 +264,12 @@ export default class HTMLManager {
         return false;
     }
 
+    /**
+     * Attempts to swap an slot in UI with empty slot.
+     * @param slot An slot `span` element from board to attempt to swap with empty slot.
+     * @param fromClient Specify if swap has been attemptted by client. Defaults to `true`.
+     * @returns nothing
+     */
     private swapEmptyWith(slot: HTMLElement, fromClient: boolean = true): void {
         const empty = this.board.querySelector(
             `span.slot[data-status="${SlotStatus.EMPTY}"]`
@@ -239,6 +308,10 @@ export default class HTMLManager {
             this.updateAlert(this.defaultAlert)
     }
 
+    /**
+     * Randomly mixes any valid game token with empty slot.
+     * @returns nothing
+     */
     private async randomMix(): Promise<void> {
         const emptySlot = this.board.querySelector(
             `span.slot[data-status="${SlotStatus.EMPTY}"]`
@@ -258,7 +331,11 @@ export default class HTMLManager {
 
         await HTMLManager.delay()  // Prevent UI to lock
     }
-
+    
+    /**
+     * Generates board on UI as a matrix.
+     * @returns Board on UI as matrix
+     */
     private getBoardMatrix(): Board {
         const slots: NodeListOf<HTMLSpanElement>
             = this.board.querySelectorAll(
@@ -269,7 +346,6 @@ export default class HTMLManager {
         const matrix: Board =
             Array(this.boardSize).fill(0).map(() =>
                 Array(this.boardSize).fill(0))
-
 
         for (const slot of slots) {
             const coords: SlotCoords = {
@@ -284,6 +360,11 @@ export default class HTMLManager {
         return matrix
     }
 
+    /**
+     * Only called if a solution to problem was found. Shows, to client, the discovered solution, found by algorithm.
+     * @param solution An arranged array of coordinates that represent the 'journey' done by the empty slot.
+     * @returns nothing
+     */
     private async paintSolution(solution: Array<SlotCoords>): Promise<void> {
         let i: number = 0
         for (const coordinate of solution) {
@@ -304,12 +385,18 @@ export default class HTMLManager {
         }
     }
 
-    /** ACTIONS
-     * These methods are called when solve, restart and mix buttons are
-     * pressed. May be called more than once, but they only have a single
-     * reference within this file.
-     */
+    /// ACTIONS
+    /// These methods are called when solve, restart and mix buttons are
+    /// pressed. May be called more than once, but they only have a single
+    /// reference within this file.
+    /// 
 
+    /**
+     * Called when client clicks the solve button on screen. Attempts to get a
+     * solution to the submitted problem and, if solution found, invokes method
+     * to show solution on screen. Handling exceptions.
+     * @returns nothing
+     */
     private async solveGame(): Promise<void> {
         const GameMgr = GameManager.Instance
         this.toggleInputs() // Disabled
@@ -341,11 +428,24 @@ export default class HTMLManager {
         this.toggleInputs() // Enabled
     }
 
+    /**
+     * Called when user wants to restart board on screen. This method cleans
+     * and re-generates game tokens for each slot in board, adding required
+     * and setting page on its initial state.
+     * @returns nothing
+     */
     private restartGame(): void {
         this.generateGame()
         this.updateAlert(this.defaultAlert)
     }
 
+    /**
+     * Recursively, swaps empty slot on screen with any surrounding game token,
+     * randomly selected, for a certain amount of moves defined by client.
+     * 
+     * Disables inputs > swaps n times > re-enables inputs
+     * @returns nothing
+     */
     private async mixBoard(): Promise<void> {
         const mixMoves: number = parseInt(this.movesInput.value)
         if (isNaN(mixMoves) || mixMoves <= 0 || mixMoves > 1000) {
